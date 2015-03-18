@@ -1,0 +1,22 @@
+{
+  "name": "Thinker",
+  "version": "0.1.0",
+  "description": "Thinks about something",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tejacques/Thinker"
+  },
+  "author": "Tom Jacques <tejacques@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/tejacques/Thinker/issues"
+  },
+  "homepage": "https://github.com/tejacques/Thinker",
+  "private": true,
+  "dependencies": {
+    "typescript": "^1.4.1"
+  }
+}
