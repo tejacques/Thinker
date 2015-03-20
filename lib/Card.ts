@@ -1,4 +1,20 @@
-﻿var data = [
+﻿export class Card {
+    number: number
+    rarity: number
+    sides: number[]
+    type: number
+    constructor(card?: Card) {
+        if (card) {
+            this.number = card.number
+            this.rarity = card.rarity
+            this.sides = card.sides.slice();
+            this.type = card.type
+        }
+    }
+}
+
+export var cards: Card[] = [
+    { number: 0, rarity: -1, sides: null, type: -1 },
     { number: 1, rarity: 1, sides: [4, 2, 3, 4], type: 0 },
     { number: 2, rarity: 1, sides: [2, 2, 7, 2], type: 0 },
     { number: 3, rarity: 1, sides: [4, 3, 3, 3], type: 0 },
@@ -80,5 +96,3 @@
     { number: 79, rarity: 5, sides: [1, 7, 10, 9], type: 0 },
     { number: 80, rarity: 5, sides: [9, 1, 7, 10], type: 0 }
 ]
-
-module.exports = data

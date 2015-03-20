@@ -30,6 +30,7 @@ node_modules
 # Visual Studio
 *.suo
 obj/
+bin/
 
 # NTVS
 .ntvs*
