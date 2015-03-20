@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <SchemaVersion>2.0</SchemaVersion>
+        <ProjectGuid>{51b7c7fc-da8e-44fc-9d64-45632e44c16f}</ProjectGuid>
+        <ProjectHome />
+        <ProjectView>ShowAllFiles</ProjectView>
+        <StartupFile />
+        <WorkingDirectory>.</WorkingDirectory>
+        <OutputPath>.</OutputPath>
+        <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
+        <TypeScriptSourceMap>true</TypeScriptSourceMap>
+        <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
+        <EnableTypeScript>true</EnableTypeScript>
+        <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+        <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+    <ItemGroup>
+        <Content Include="index.html" />
+        <Content Include="package.json" />
+        <TypeScriptCompile Include="lib\negamax.ts" />
+        <Compile Include="lib\data.js" />
+        <Content Include="assets\img\bg.png" />
+        <Content Include="assets\img\face\001.png" />
+        <Content Include="assets\img\face\002.png" />
+        <Content Include="assets\img\face\003.png" />
+        <Content Include="assets\img\face\004.png" />
+        <Content Include="assets\img\face\005.png" />
+        <Content Include="assets\img\face\006.png" />
+        <Content Include="assets\img\face\007.png" />
+        <Content Include="assets\img\face\008.png" />
+        <Content Include="assets\img\face\009.png" />
+        <Content Include="assets\img\face\010.png" />
+        <Content Include="assets\img\face\011.png" />
+        <Content Include="assets\img\face\012.png" />
+        <Content Include="assets\img\face\013.png" />
+        <Content Include="assets\img\face\014.png" />
+        <Content Include="assets\img\face\015.png" />
+        <Content Include="assets\img\face\016.png" />
+        <Content Include="assets\img\face\017.png" />
+        <Content Include="assets\img\face\018.png" />
+        <Content Include="assets\img\face\019.png" />
+        <Content Include="assets\img\face\020.png" />
+        <Content Include="assets\img\face\021.png" />
+        <Content Include="assets\img\face\022.png" />
+        <Content Include="assets\img\face\023.png" />
+        <Content Include="assets\img\face\024.png" />
+        <Content Include="assets\img\face\025.png" />
+        <Content Include="assets\img\face\026.png" />
+        <Content Include="assets\img\face\027.png" />
+        <Content Include="assets\img\face\028.png" />
+        <Content Include="assets\img\face\029.png" />
+        <Content Include="assets\img\face\030.png" />
+        <Content Include="assets\img\face\031.png" />
+        <Content Include="assets\img\face\032.png" />
+        <Content Include="assets\img\face\033.png" />
+        <Content Include="assets\img\face\034.png" />
+        <Content Include="assets\img\face\035.png" />
+        <Content Include="assets\img\face\036.png" />
+        <Content Include="assets\img\face\037.png" />
+        <Content Include="assets\img\face\038.png" />
+        <Content Include="assets\img\face\039.png" />
+        <Content Include="assets\img\face\040.png" />
+        <Content Include="assets\img\face\041.png" />
+        <Content Include="assets\img\face\042.png" />
+        <Content Include="assets\img\face\043.png" />
+        <Content Include="assets\img\face\044.png" />
+        <Content Include="assets\img\face\045.png" />
+        <Content Include="assets\img\face\046.png" />
+        <Content Include="assets\img\face\047.png" />
+        <Content Include="assets\img\face\048.png" />
+        <Content Include="assets\img\face\049.png" />
+        <Content Include="assets\img\face\050.png" />
+        <Content Include="assets\img\face\051.png" />
+        <Content Include="assets\img\face\052.png" />
+        <Content Include="assets\img\face\053.png" />
+        <Content Include="assets\img\face\054.png" />
+        <Content Include="assets\img\face\055.png" />
+        <Content Include="assets\img\face\056.png" />
+        <Content Include="assets\img\face\057.png" />
+        <Content Include="assets\img\face\058.png" />
+        <Content Include="assets\img\face\059.png" />
+        <Content Include="assets\img\face\060.png" />
+        <Content Include="assets\img\face\061.png" />
+        <Content Include="assets\img\face\062.png" />
+        <Content Include="assets\img\face\063.png" />
+        <Content Include="assets\img\face\064.png" />
+        <Content Include="assets\img\face\065.png" />
+        <Content Include="assets\img\face\066.png" />
+        <Content Include="assets\img\face\067.png" />
+        <Content Include="assets\img\face\068.png" />
+        <Content Include="assets\img\face\069.png" />
+        <Content Include="assets\img\face\070.png" />
+        <Content Include="assets\img\face\071.png" />
+        <Content Include="assets\img\face\072.png" />
+        <Content Include="assets\img\face\073.png" />
+        <Content Include="assets\img\face\074.png" />
+        <Content Include="assets\img\face\075.png" />
+        <Content Include="assets\img\face\076.png" />
+        <Content Include="assets\img\face\077.png" />
+        <Content Include="assets\img\face\078.png" />
+        <Content Include="assets\img\face\079.png" />
+        <Content Include="assets\img\face\080.png" />
+        <Content Include="assets\img\number\1.png" />
+        <Content Include="assets\img\number\10.png" />
+        <Content Include="assets\img\number\2.png" />
+        <Content Include="assets\img\number\3.png" />
+        <Content Include="assets\img\number\4.png" />
+        <Content Include="assets\img\number\5.png" />
+        <Content Include="assets\img\number\6.png" />
+        <Content Include="assets\img\number\7.png" />
+        <Content Include="assets\img\number\8.png" />
+        <Content Include="assets\img\number\9.png" />
+        <Content Include="assets\img\stars\1stars.png" />
+        <Content Include="assets\img\stars\2stars.png" />
+        <Content Include="assets\img\stars\3stars.png" />
+        <Content Include="assets\img\stars\4stars.png" />
+        <Content Include="assets\img\stars\5stars.png" />
+        <Content Include="assets\img\type\1.png" />
+        <Content Include="assets\img\type\2.png" />
+        <Content Include="assets\img\type\3.png" />
+        <Content Include="assets\img\type\4.png" />
+        <TypeScriptCompile Include="Scripts\typings\node\node.d.ts" />
+    </ItemGroup>
+    <ItemGroup>
+        <Folder Include="assets" />
+        <Folder Include="assets\img" />
+        <Folder Include="assets\img\face" />
+        <Folder Include="assets\img\number" />
+        <Folder Include="assets\img\stars" />
+        <Folder Include="assets\img\type" />
+        <Folder Include="lib" />
+        <Folder Include="Scripts" />
+        <Folder Include="Scripts\typings" />
+        <Folder Include="Scripts\typings\node" />
+    </ItemGroup>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+    <!--Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them.-->
+    <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
+    <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsTools.targets" />
+    <ProjectExtensions>
+        <VisualStudio>
+          <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+            <WebProjectProperties>
+              <UseIIS>False</UseIIS>
+              <AutoAssignPort>True</AutoAssignPort>
+              <DevelopmentServerPort>0</DevelopmentServerPort>
+              <DevelopmentServerVPath>/</DevelopmentServerVPath>
+              <IISUrl>http://localhost:48022/</IISUrl>
+              <NTLMAuthentication>False</NTLMAuthentication>
+              <UseCustomServer>True</UseCustomServer>
+              <CustomServerUrl>http://localhost:1337</CustomServerUrl>
+              <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+            </WebProjectProperties>
+          </FlavorProperties>
+          <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+            <WebProjectProperties>
+              <StartPageUrl>
+              </StartPageUrl>
+              <StartAction>CurrentPage</StartAction>
+              <AspNetDebugging>True</AspNetDebugging>
+              <SilverlightDebugging>False</SilverlightDebugging>
+              <NativeDebugging>False</NativeDebugging>
+              <SQLDebugging>False</SQLDebugging>
+              <ExternalProgram>
+              </ExternalProgram>
+              <StartExternalURL>
+              </StartExternalURL>
+              <StartCmdLineArguments>
+              </StartCmdLineArguments>
+              <StartWorkingDirectory>
+              </StartWorkingDirectory>
+              <EnableENC>False</EnableENC>
+              <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+            </WebProjectProperties>
+          </FlavorProperties>
+        </VisualStudio>
+    </ProjectExtensions>
+</Project>
