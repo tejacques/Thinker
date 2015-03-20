@@ -124,9 +124,9 @@
     <Content Include="assets\img\type\2.png" />
     <Content Include="assets\img\type\3.png" />
     <Content Include="assets\img\type\4.png" />
-    <TypeScriptCompile Include="Scripts\typings\expect.js\expect.js.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\mocha\mocha.d.ts" />
-    <TypeScriptCompile Include="Scripts\typings\node\node.d.ts" />
+    <TypeScriptCompile Include="typings\expect.js\expect.js.d.ts" />
+    <TypeScriptCompile Include="typings\mocha\mocha.d.ts" />
+    <TypeScriptCompile Include="typings\node\node.d.ts" />
     <TypeScriptCompile Include="test\negamax-spec.ts">
       <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>
@@ -140,12 +140,11 @@
     <Folder Include="assets\img\stars" />
     <Folder Include="assets\img\type" />
     <Folder Include="lib" />
-    <Folder Include="Scripts\typings\mocha\" />
-    <Folder Include="Scripts\typings\expect.js\" />
+    <Folder Include="typings\mocha\" />
+    <Folder Include="typings\expect.js\" />
     <Folder Include="test\" />
-    <Folder Include="Scripts" />
-    <Folder Include="Scripts\typings" />
-    <Folder Include="Scripts\typings\node" />
+    <Folder Include="typings\" />
+    <Folder Include="typings\node\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <!--Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them.-->
