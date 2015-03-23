@@ -7,5 +7,6 @@ describe("Negamax",() => {
         it("should pick 0,0 to win",() => {
             // ToDo: This test
         });
-    }
+    })
+
 });
