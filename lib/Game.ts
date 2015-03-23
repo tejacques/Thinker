@@ -50,18 +50,18 @@ export enum RuleSet {
 
 export enum RuleSetFlags {
     None = 0,
-    AO = 0 << RuleSet.AO,
-    TO  = 0 << RuleSet.Asc,
-    Sam = 0 << RuleSet.Sam,
-    Plu = 0 << RuleSet.Plu,
-    Com = 0 << RuleSet.Sam || 0 << RuleSet.Plu,
-    Rev = 0 << RuleSet.Rev,
-    FA  = 0 << RuleSet.FA,
-    Asc = 0 << RuleSet.Asc,
-    Des = 0 << RuleSet.Des,
-    Rnd = 0 << RuleSet.Rnd,
-    Ord = 0 << RuleSet.Ord,
-    Cha = 0 << RuleSet.Cha,
+    AO = 1 << RuleSet.AO,
+    TO  = 1 << RuleSet.Asc,
+    Sam = 1 << RuleSet.Sam,
+    Plu = 1 << RuleSet.Plu,
+    Com = 1 << RuleSet.Sam | 1 << RuleSet.Plu,
+    Rev = 1 << RuleSet.Rev,
+    FA  = 1 << RuleSet.FA,
+    Asc = 1 << RuleSet.Asc,
+    Des = 1 << RuleSet.Des,
+    Rnd = 1 << RuleSet.Rnd,
+    Ord = 1 << RuleSet.Ord,
+    Cha = 1 << RuleSet.Cha,
     // Swap, // Don't need to worry about this since it happens at game start
 }
 
@@ -98,10 +98,11 @@ export class Game implements Nodes.GameNode<Game> {
         return this.players[this.getPlayerId()]
     }
     value() {
+        // This always scores the value for the first player
         var val = 0;
         var playerId = this.getPlayerId()
         this.board.forEach((card) => {
-            if (card.player === playerId) val++
+            if (card && card.player === 0) val++
         })
 
         return val
@@ -125,25 +126,64 @@ export class Game implements Nodes.GameNode<Game> {
         var deckIndex = 0
         var boardIndex = 0
 
-        var getIndexes = (arr: Array<Object>) => arr
-            .map((item, index) => item ? index : -1)
+        var getIndexes = (arr: Array<Object>, predicate: (item: Object, index?: number) => boolean) => arr
+            .map((item, index) => predicate(item, index) ? index : -1)
             .filter(val => val >= 0)
 
-        var handIndexes = getIndexes(player.hand)
+        // Valid hand indexes are any non nulls
+        var handIndexes = getIndexes(player.hand, item => item !== null)
+        // Valid deck indexes are any
         var deckIndexes = range(0, player.deck.length)
-        var boardIndexes = getIndexes(this.board)
+        // Valid board indexes are nulls (unplayed positions)
+        var boardIndexes = getIndexes(this.board, item => !item)
+        var lookedThroughDeck = false;
 
         var iterator = {
             getNext: () => {
-                if (handIndex < handIndexes.length
-                    && boardIndex < boardIndexes.length) {
-                    var cardId = player.hand
-                }
-                if (playableCards[index]) {
+                if (handIndex < handIndexes.length) {
+                    var handIdx = handIndexes[handIndex]
+                    var deckIdx = deckIndexes[deckIndex]
+                    var boardIdx = boardIndexes[boardIndex]
                     var node = this.playCard(
-                        handIndex,
-                        deckIndex,
-                        boardIndex);
+                        handIdx,
+                        deckIdx,
+                        boardIdx
+                    );
+
+                    // Go to the next move
+                    var handCardId = player.hand[handIdx]
+
+                    // If our hand card is a 0 and we haven't looked through
+                    // the deck yet
+                    if (!lookedThroughDeck
+                        && handCardId === 0
+                        && deckIndex < deckIndexes.length - 1) {
+                        // If we have more cards to look through in the deck:
+                        // -1 to deckIndexex.length because we just
+                        // evaluated one so we're really in a do..while loop
+                        // equivalent.We only want to evaluate the next one
+                        // if it is valid
+                        deckIndex++
+                    } else if (boardIndex < boardIndexes.length -1) {
+                        // If we have more board positions to look through
+                        // -1 to boardIndexes.length because we just
+                        // evaluated one so we're really in a do..while loop
+                        // equivalent.We only want to evaluate the next one
+                        // if it is valid
+                        deckIndex = 0
+                        boardIndex++
+                    } else {
+                        boardIndex = 0
+                        handIndex++
+
+                        // If the hand card is a 0, we must have looked through
+                        // the deck once we've gotten here
+                        if (!lookedThroughDeck
+                            && handCardId === 0) {
+                            lookedThroughDeck = true
+                        }
+                    }
+
                     return node
                 }
 
@@ -157,14 +197,20 @@ export class Game implements Nodes.GameNode<Game> {
     }
     playCard(handIndex: number, deckIndex: number, boardIndex: number): Game {
         var node = this.clone()
-        var playerId = node.turn % node.players.length
+        var playerId = node.getPlayerId()
         var player = node.players[playerId]
-        var cardId = player.hand[handIndex]
+
+        // Get the cardId. This is either from the hand, or the deck
+        var handId = player.hand[handIndex]
+        var deckId = player.deck[deckIndex]
+        var cardId = handId || deckId
 
         // Remove card from player's hand. A value of null means that card has been played
         player.hand[handIndex] = null
         // Delete card from player's deck
-        player.deck = player.deck.splice(deckIndex, 1)
+        if (player.deck.length && handId === 0) {
+            player.deck = player.deck.splice(deckIndex, 1)
+        }
         // Place the card on the board
         var playerCard = node.board[boardIndex] = new PlayerCard(cardId, playerId)
         var card = cardList[playerCard.card]
@@ -204,6 +250,8 @@ export class Game implements Nodes.GameNode<Game> {
             // If combo is in effect, keep going!
             if (node.rules & RuleSetFlags.Com) {
                 capturedPositions = nextCapturedPositions
+            } else {
+                capturedPositions = []
             }
         }
 
@@ -238,8 +286,7 @@ function getSide(side: number, offset: number) {
     return (side + offset) % 4
 }
 
-
-function getCaptures(node: Game, playerCard: PlayerCard, sideIndexes: number[]): number[] {
+function getCaptures(node: Game, playerCard: PlayerCard, boardIndexes: number[]): number[] {
     var capturedIndexes: number[] = []
 
     if (!playerCard) {
@@ -247,31 +294,45 @@ function getCaptures(node: Game, playerCard: PlayerCard, sideIndexes: number[]):
     }
 
     // Only capture if the card is present and the player is different
-    var sides = sideIndexes.filter((side) =>
-        node.board[side] && node.board[side].player !== playerCard.player)
+    var filteredBoardIndexes = boardIndexes
+        .map((boardIndex, index) => [boardIndex, index])
+        .filter((indexes) => {
+            var boardIndex = indexes[0]
+            return node.board[boardIndex]
+                && node.board[boardIndex].player !== playerCard.player
+        })
 
     var card = cardList[playerCard.card]
 
     // Basic rule
-    sides.forEach(side => {
-        var sideCard = node.board[side]
+    filteredBoardIndexes.forEach(indexes => {
+        var boardIndex = indexes[0]
+        var sideIndex = indexes[1]
+
+        // Get the side Index
+        var sideCard = node.board[boardIndex]
         var otherCard = cardList[sideCard.card]
-        var sideValue = card.sides[side];
-        var otherValue = otherCard[getOppositeSide(side)]
+
+        var sideValue = card.sides[sideIndex];
+        var otherValue = otherCard.sides[getOppositeSide(sideIndex)]
         var rev = node.rules & RuleSetFlags.Rev
         if (rev && sideValue < otherValue
             || !rev && sideValue > otherValue) {
-            capturedIndexes.push(side)
+            capturedIndexes.push(boardIndex)
         }
     })
 
     // Rules.Sam
     if (node.rules & RuleSetFlags.Sam) {
-        var samSides = sides.filter((side) => {
-            var sideCard = node.board[side]
+        var samSides = filteredBoardIndexes.filter(indexes => {
+            var boardIndex = indexes[0]
+            var sideIndex = indexes[1]
+
+            var sideCard = node.board[boardIndex]
             var otherCard = cardList[sideCard.card]
-            var sideValue = card.sides[side];
-            var otherValue = otherCard[getOppositeSide(side)]
+
+            var sideValue = card.sides[sideIndex];
+            var otherValue = otherCard[getOppositeSide(sideIndex)]
 
             return sideValue === otherValue
         })

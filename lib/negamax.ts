@@ -6,10 +6,7 @@ function negamax<T extends game.GameNode<any>>(
     options?: Options
     ): game.GameNodeScore<T> {
     'use strict'
-    var best: game.GameNodeScore<T> = {
-        node: null,
-        score: -Infinity
-    }
+    
     var opts = options || <Options>{}
     var color = opts.color || -1
     var depth = opts.depth || 10
@@ -22,40 +19,37 @@ function negamax<T extends game.GameNode<any>>(
         beta: number,
         color: number) {
         if (depth === 0 || node.isTerminal()) {
-            return color * node.value()
+            //return color * node.value()
+            return {
+                node: node,
+                score: color * node.value()
+            }
         }
 
-        var bestValue = -Infinity
+        var best: game.GameNodeScore<T> = {
+            node: null,
+            score: -Infinity
+        }
         var iterator = node.getMoveIterator()
         var child: game.GameNode<T>
         while ( (child = iterator.getNext()) ) {
-            var value = -negamax(child, depth - 1, -beta, -alpha, -color)
-            bestValue = Math.max(value, bestValue)
-            var skip = Math.max(alpha, value) >= beta
-            if (skip) {
+            var ns = negamax(child, depth - 1, -beta, -alpha, -color)
+            ns.score = -ns.score
+            var value = ns.score
+            if (value > best.score) {
+                best.score = value
+                best.node = child
+            }
+            alpha = Math.max(alpha, value)
+            if (alpha >= beta) {
                 break
             }
         }
 
-        return bestValue
+        return best
     }
 
-    // return node with highest score
-    var iterator = node.getMoveIterator()
-    var child: game.GameNode<T>
-    while ((child = iterator.getNext())) {
-        var score = color * negamax(child, depth, -Infinity, Infinity, color)
-        if (score <= best.score) {
-            // Don't take this move if it's equal or worse
-            // Take this move if it's better than our current best
-            best.node = child
-            best.score = score
-        }
-        best.node = child
-        best.score = score
-    }
-
-    return best
+    return negamax(node, depth, -Infinity, Infinity, color)
 }
 
 export = negamax
