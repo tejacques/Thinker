@@ -95,10 +95,12 @@ describe("Negamax", () => {
             var gns2 = negamax(gns.node, { depth: 10, color: 1 })
             var move2 = gns2.node.originalNode.move
             var value2 = gns2.node.value()
+            var playerValue = gns2.node.originalNode.playerValue(0)
 
             var gns3 = negamax(gns2.node, { depth: 10, color: 1 })
             var move3 = gns3.node.originalNode.move
             var value3 = gns3.node.value()
+            var playerValue = gns3.node.originalNode.playerValue(0)
 
             var x = 1
         });
