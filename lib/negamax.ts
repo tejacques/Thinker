@@ -12,10 +12,6 @@ function negamax (node: GameNode, options: Options): GameNodeScore {
     var opts = options || <Options>{}
     var color = opts.color || -1
     var depth = opts.depth || 10
-    var generateMoves: (node: GameNode) => GameNode[] =
-        opts.generateMoves || node.generateMoves
-    var heuristic = opts.heuristic || node.value
-    var isTerminal = opts.isTerminal || node.isTerminal
 
     // Source: http://wikipedia.org/wiki/Negamax
     var negamax = function(
@@ -25,24 +21,28 @@ function negamax (node: GameNode, options: Options): GameNodeScore {
         beta: number,
         color: number) {
         if (depth === 0 || node.isTerminal()) {
-            return color * heuristic(node)
+            return color * node.value()
         }
 
         var bestValue = -Infinity
-        var childNodes = generateMoves(node)
-        childNodes.forEach((child) => {
+        var iterator = node.getMoveIterator()
+        var child: GameNode
+        while ( (child = iterator.getNext()) ) {
             var value = -negamax(child, depth - 1, -beta, -alpha, -color)
             bestValue = Math.max(value, bestValue)
             var skip = Math.max(alpha, value) >= beta
-            if (skip) return false
-        })
+            if (skip) {
+                break
+            }
+        }
 
         return bestValue
     }
 
     // return node with highest score
-    var childNodes = generateMoves(node)
-    childNodes.forEach((child) => {
+    var iterator = node.getMoveIterator()
+    var child: GameNode
+    while ((child = iterator.getNext())) {
         var score = color * negamax(child, depth, -Infinity, Infinity, color)
         if (score <= best.score) {
             // Don't take this move if it's equal or worse
@@ -52,7 +52,7 @@ function negamax (node: GameNode, options: Options): GameNodeScore {
         }
         best.node = child
         best.score = score
-    })
+    }
 
     return best
 }

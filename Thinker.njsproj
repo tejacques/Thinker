@@ -21,7 +21,8 @@
   <ItemGroup>
     <Content Include="index.html" />
     <Content Include="package.json" />
-    <TypeScriptCompile Include="lib\Card.ts" />
+    <TypeScriptCompile Include="lib\GameCard.ts" />
+    <TypeScriptCompile Include="lib\Game.ts" />
     <TypeScriptCompile Include="lib\GameNode.ts" />
     <TypeScriptCompile Include="lib\negamax.ts" />
     <Content Include="assets\img\bg.png" />

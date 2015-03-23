@@ -13,7 +13,7 @@
     }
 }
 
-export var cards: Card[] = [
+export var cardList: Card[] = [
     { number: 0, rarity: -1, sides: null, type: -1 },
     { number: 1, rarity: 1, sides: [4, 2, 3, 4], type: 0 },
     { number: 2, rarity: 1, sides: [2, 2, 7, 2], type: 0 },

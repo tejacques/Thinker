@@ -1,16 +1,11 @@
-﻿import expect = require('expect.js');
+﻿import game = require('../lib/Game')
+import expect = require('expect.js');
 
-describe("Test Suite 1",() => {
+describe("Negamax",() => {
 
-    it("Test A", () => {
-        expect(true).to.be.ok();
-    });
-
-    describe("Test Subsuite",() => {
-        it("Test B",() => {
-            var actual = 1
-            var expected = 2
-            expect(actual).to.be(expected);
+    describe("Game", function () {
+        it("should pick 0,0 to win",() => {
+            // ToDo: This test
         });
-    });
+    }
 });
