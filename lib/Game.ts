@@ -102,7 +102,20 @@ export class Game implements Nodes.GameNode<Game> {
         var val = 0;
         var playerId = this.getPlayerId()
         this.board.forEach((card) => {
-            if (card && card.player === 0) val++
+            if (card) {
+                if (card.player === 0) val++
+                else val--
+            }
+        })
+
+        return val
+    }
+    playerValue(playerId: number) {
+        var val = 0;
+        this.board.forEach((card) => {
+            if (card) {
+                if (card.player === playerId) val++
+            }
         })
 
         return val

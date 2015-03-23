@@ -25,13 +25,14 @@ describe("Negamax", () => {
             var gns = negamax(gameNode, { depth: 1, color: 1 })
             var move = gns.node.originalNode.move;
             var value = gns.node.value()
+            var playerValue = gns.node.originalNode.playerValue(0)
 
             expect(move.boardIndex).to.be(0)
             expect(move.handIndex).to.be(1)
             expect(move.player).to.be(0)
             expect(move.card.number).to.be(10)
-            expect(value).to.be(5)
-            expect(gns.score).to.be(5)
+            expect(playerValue).to.be(5)
+            //expect(gns.score).to.be(5)
         });
 
         it("should pick card 12 in boardIndex 0",() => {
@@ -53,13 +54,14 @@ describe("Negamax", () => {
             var gns = negamax(gameNode, { depth: 1, color: 1 })
             var move = gns.node.originalNode.move;
             var value = gns.node.value()
+            var playerValue = gns.node.originalNode.playerValue(0)
 
             expect(move.boardIndex).to.be(0)
             expect(move.handIndex).to.be(2)
             expect(move.player).to.be(0)
             expect(move.card.number).to.be(12)
-            expect(value).to.be(6)
-            expect(gns.score).to.be(6)
+            expect(playerValue).to.be(6)
+            //expect(gns.score).to.be(6)
         });
 
         it("should pick card 12 in boardIndex 1",() => {
@@ -81,6 +83,7 @@ describe("Negamax", () => {
             var gns = negamax(gameNode, { depth: 10, color: 1 })
             var move = gns.node.originalNode.move;
             var value = gns.node.value()
+            var playerValue = gns.node.originalNode.playerValue(0)
 
             //expect(move.boardIndex).to.be(1)
             //expect(move.handIndex).to.be(2)
