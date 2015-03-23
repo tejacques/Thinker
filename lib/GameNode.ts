@@ -2,21 +2,22 @@
     getNext: () => T
 }
 
-export interface GameNode {
-    getMoveIterator: () => Iterator<GameNode>
+interface Node {
     value: () => number
     isTerminal: () => boolean
 }
 
-export interface GameNodeScore {
-    score: Number;
-    node: GameNode
+export interface GameNode<T extends GameNode<any>> extends Node {
+    getMoveIterator: () => Iterator<GameNode<T>>
+    originalNode: T
+}
+
+export interface GameNodeScore<T extends GameNode<any>> {
+    score: number;
+    node: GameNode<T>
 }
 
 export interface Options {
-    color: number;
-    depth: number;
-    generateMoves?: (node: GameNode) => Iterator<GameNode>
-    heuristic?: (node: GameNode) => number
-    isTerminal?: () => boolean
+    color?: number;
+    depth?: number;
 }

@@ -2,8 +2,6 @@
 import GameCard = require('./GameCard')
 import range = require('./range')
 var cardList = GameCard.cardList
-type GameNode = Nodes.GameNode
-type GameNodeScore = Nodes.GameNodeScore
 type Card = GameCard.Card
 
 export class PlayerCard {
@@ -51,6 +49,7 @@ export enum RuleSet {
 }
 
 export enum RuleSetFlags {
+    None = 0,
     AO = 0 << RuleSet.AO,
     TO  = 0 << RuleSet.Asc,
     Sam = 0 << RuleSet.Sam,
@@ -66,22 +65,31 @@ export enum RuleSetFlags {
     // Swap, // Don't need to worry about this since it happens at game start
 }
 
-export class Game implements Nodes.GameNode {
+export class Game implements Nodes.GameNode<Game> {
     board: Board
     players: Player[]
     firstMove: number
     turn: number
     rules: RuleSetFlags
-    constructor(node?: Game) {
-        if (node) {
-            this.board = node.board.map((card) => card.clone())
-            this.players = node.players.map((player) => player.clone())
-            this.turn = node.turn;
-            this.firstMove = node.firstMove
-            this.rules = node.rules
-        } else {
-            this.board = <PlayerCard[]>Array(9)
-        }
+    move: {
+        boardIndex: number
+        handIndex: number
+        player: number
+        card: Card
+    }
+    originalNode: Game
+    constructor(
+        board: Board,
+        players: Player[],
+        turn: number,
+        firstMove: number,
+        rules: RuleSetFlags) {
+        this.board = board.map((card) => card? card.clone() : null)
+        this.players = players.map((player) => player.clone())
+        this.turn = turn;
+        this.firstMove = firstMove
+        this.rules = rules
+        this.originalNode = this
     }
     getPlayerId() {
         return (this.turn + this.firstMove) % this.players.length
@@ -99,7 +107,7 @@ export class Game implements Nodes.GameNode {
         return val
     }
     isTerminal() {
-        return false
+        return this.board.filter(spot => !spot).length === 0
     }
     getMoveIterator() {
         // Can:
@@ -125,7 +133,7 @@ export class Game implements Nodes.GameNode {
         var deckIndexes = range(0, player.deck.length)
         var boardIndexes = getIndexes(this.board)
 
-        var iterator: Nodes.Iterator<Game> = {
+        var iterator = {
             getNext: () => {
                 if (handIndex < handIndexes.length
                     && boardIndex < boardIndexes.length) {
@@ -145,7 +153,7 @@ export class Game implements Nodes.GameNode {
         return iterator
     }
     clone() {
-        return new Game(this)
+        return new Game(this.board, this.players, this.turn, this.firstMove, this.rules)
     }
     playCard(handIndex: number, deckIndex: number, boardIndex: number): Game {
         var node = this.clone()
@@ -158,7 +166,16 @@ export class Game implements Nodes.GameNode {
         // Delete card from player's deck
         player.deck = player.deck.splice(deckIndex, 1)
         // Place the card on the board
-        var card = node.board[boardIndex] = new PlayerCard(cardId, playerId)
+        var playerCard = node.board[boardIndex] = new PlayerCard(cardId, playerId)
+        var card = cardList[playerCard.card]
+
+        // Set the move
+        node.move = {
+            boardIndex: boardIndex,
+            handIndex: handIndex,
+            player: playerId,
+            card: card
+        }
 
         // Apply capturing logic here to alter other board playerId
         // node.board ...
@@ -176,7 +193,7 @@ export class Game implements Nodes.GameNode {
 
                 var sideIndexes = [upIndex, rightIndex, downIndex, leftIndex]
 
-                nextCapturedPositions = getCaptures(node, card, sideIndexes)
+                nextCapturedPositions = getCaptures(node, playerCard, sideIndexes)
 
                 // Capture the positions
                 nextCapturedPositions.forEach(index => {

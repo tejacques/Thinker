@@ -1,11 +1,12 @@
 import game = require('./GameNode')
-type GameNode = game.GameNode
-type GameNodeScore = game.GameNodeScore
 type Options = game.Options
 
-function negamax (node: GameNode, options: Options): GameNodeScore {
+function negamax<T extends game.GameNode<any>>(
+    node: game.GameNode<T>,
+    options?: Options
+    ): game.GameNodeScore<T> {
     'use strict'
-    var best: GameNodeScore = {
+    var best: game.GameNodeScore<T> = {
         node: null,
         score: -Infinity
     }
@@ -15,7 +16,7 @@ function negamax (node: GameNode, options: Options): GameNodeScore {
 
     // Source: http://wikipedia.org/wiki/Negamax
     var negamax = function(
-        node: GameNode,
+        node: game.GameNode<T>,
         depth: number,
         alpha: number,
         beta: number,
@@ -26,7 +27,7 @@ function negamax (node: GameNode, options: Options): GameNodeScore {
 
         var bestValue = -Infinity
         var iterator = node.getMoveIterator()
-        var child: GameNode
+        var child: game.GameNode<T>
         while ( (child = iterator.getNext()) ) {
             var value = -negamax(child, depth - 1, -beta, -alpha, -color)
             bestValue = Math.max(value, bestValue)
@@ -41,7 +42,7 @@ function negamax (node: GameNode, options: Options): GameNodeScore {
 
     // return node with highest score
     var iterator = node.getMoveIterator()
-    var child: GameNode
+    var child: game.GameNode<T>
     while ((child = iterator.getNext())) {
         var score = color * negamax(child, depth, -Infinity, Infinity, color)
         if (score <= best.score) {
