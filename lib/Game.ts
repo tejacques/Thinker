@@ -243,14 +243,7 @@ export class Game implements Nodes.GameNode<Game> {
             var nextCapturedPositions: number[] = []
             for (var i = 0; i < capturedPositions.length; i++) {
                 var index = capturedPositions[i]
-                var upIndex = index - 3
-                var rightIndex = index + 1
-                var downIndex = index + 3
-                var leftIndex = index - 1
-
-                var sideIndexes = [upIndex, rightIndex, downIndex, leftIndex]
-
-                nextCapturedPositions = getCaptures(node, playerCard, sideIndexes)
+                nextCapturedPositions = getCaptures(node, playerCard, index)
 
                 // Capture the positions
                 nextCapturedPositions.forEach(index => {
@@ -297,16 +290,34 @@ function getSide(side: number, offset: number) {
     return (side + offset) % 4
 }
 
-function getCaptures(node: Game, playerCard: PlayerCard, boardIndexes: number[]): number[] {
+function getCaptures(
+    node: Game,
+    playerCard: PlayerCard,
+    index: number
+    ): number[] {
     var capturedIndexes: number[] = []
 
     if (!playerCard) {
         return capturedIndexes
     }
 
+    var x = index % 3
+    var y = (index / 3) | 0
+    var upIndex = index - 3
+    var rightIndex = index + 1
+    var downIndex = index + 3
+    var leftIndex = index - 1
+
+    var boardIndexes: number[][] = []
+
+    if (y > 0) boardIndexes.push([upIndex, 0])
+    if (x < 3) boardIndexes.push([rightIndex, 1])
+    if (y < 3) boardIndexes.push([downIndex, 2])
+    if (x > 0) boardIndexes.push([leftIndex, 3])
+
     // Only capture if the card is present and the player is different
     var filteredBoardIndexes = boardIndexes
-        .map((boardIndex, index) => [boardIndex, index])
+        //.map((boardIndex, index) => [boardIndex, index])
         .filter((indexes) => {
             var boardIndex = indexes[0]
             return node.board[boardIndex]

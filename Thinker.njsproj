@@ -125,7 +125,9 @@
     <Content Include="assets\img\type\2.png" />
     <Content Include="assets\img\type\3.png" />
     <Content Include="assets\img\type\4.png" />
+    <TypeScriptCompile Include="lib\PrintBoard.ts" />
     <TypeScriptCompile Include="lib\Range.ts" />
+    <TypeScriptCompile Include="typings\chalk\chalk.d.ts" />
     <TypeScriptCompile Include="typings\expect.js\expect.js.d.ts" />
     <TypeScriptCompile Include="typings\mocha\mocha.d.ts" />
     <TypeScriptCompile Include="typings\node\node.d.ts" />
@@ -146,6 +148,7 @@
     <Folder Include="typings\expect.js\" />
     <Folder Include="test\" />
     <Folder Include="typings\" />
+    <Folder Include="typings\chalk\" />
     <Folder Include="typings\node\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
