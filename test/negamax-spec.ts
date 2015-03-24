@@ -86,13 +86,6 @@ describe("Negamax", () => {
             var value = gns.node.value()
             var playerValue = gns.node.originalNode.playerValue(0)
 
-            //expect(move.boardIndex).to.be(1)
-            //expect(move.handIndex).to.be(2)
-            //expect(move.player).to.be(0)
-            //expect(move.card.number).to.be(12)
-            //expect(value).to.be(4)
-            //expect(gns.score).to.be(6)
-
             var gns2 = negamax(gns.node, { depth: 10, color: -1 })
             var move2 = gns2.node.originalNode.move
             var value2 = gns2.node.value()
@@ -104,45 +97,17 @@ describe("Negamax", () => {
             var playerValue = gns3.node.originalNode.playerValue(0)
 
 
-            //printBoard(gameNode.originalNode.board)
-            //printBoard(gns.node.originalNode.board)
-            //printBoard(gns2.node.originalNode.board)
-            //printBoard(gns3.node.originalNode.board)
+            printBoard(gameNode.originalNode.board)
+            printBoard(gns.node.originalNode.board)
+            printBoard(gns2.node.originalNode.board)
+            printBoard(gns3.node.originalNode.board)
 
-            var altgns = negamax(gameNode, { depth: 1, color: 1 })
-            var altmove = altgns.node.originalNode.move;
-            var altvalue = altgns.node.value()
-            var altplayerValue = altgns.node.originalNode.playerValue(0)
-
-            var altgns2 = negamax(altgns.node, { depth: 2, color: -1 })
-            var altmove2 = altgns2.node.originalNode.move;
-            var altvalue2 = altgns2.node.value()
-            var altplayerValue2 = altgns2.node.originalNode.playerValue(0)
-
-            var altgns3 = negamax(altgns2.node, { depth: 2, color: 1 })
-            var altmove3 = altgns3.node.originalNode.move;
-            var altvalue3 = altgns3.node.value()
-            var altplayerValue3 = altgns3.node.originalNode.playerValue(0)
-
-            //console.log(altgns.node.originalNode.board)
-            //console.log(altgns2.node.originalNode.board)
-            //console.log(altgns3.node.originalNode.board)
-
-            //printBoard(altgns.node.originalNode.board)
-            //console.log()
-            //printBoard(altgns2.node.originalNode.board)
-            //console.log()
-
-            //console.log()
-            //console.log()
-            //console.log()
-
-            //printBoard(gameNode.originalNode.board)
-            //printBoard(altgns.node.originalNode.board)
-            //printBoard(altgns2.node.originalNode.board)
-            //printBoard(altgns3.node.originalNode.board)
-
-            var x = 1
+            expect(move.boardIndex).to.be(1)
+            expect(move.handIndex).to.be(2)
+            expect(move.player).to.be(0)
+            expect(move.card.number).to.be(12)
+            expect(value).to.be(4)
+            expect(gns.score).to.be(6)
         })
 
         it("should pick card 12 in 1",() => {
@@ -166,8 +131,8 @@ describe("Negamax", () => {
             var value = gns.node.value()
             var playerValue = gns.node.originalNode.playerValue(0)
 
-            printBoard(gameNode.originalNode.board)
-            printBoard(gns.node.originalNode.board)
+            //printBoard(gameNode.originalNode.board)
+            //printBoard(gns.node.originalNode.board)
 
             expect(move.boardIndex).to.be(1)
             expect(move.handIndex).to.be(1)
