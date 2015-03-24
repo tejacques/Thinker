@@ -85,6 +85,11 @@ describe("Negamax", () => {
             var value = gns.node.value()
             var playerValue = gns.node.originalNode.playerValue(0)
 
+            var altgns = negamax(gameNode, { depth: 1, color: 1 })
+            var altmove = altgns.node.originalNode.move;
+            var altvalue = altgns.node.value()
+            var altplayerValue = altgns.node.originalNode.playerValue(0)
+
             //expect(move.boardIndex).to.be(1)
             //expect(move.handIndex).to.be(2)
             //expect(move.player).to.be(0)

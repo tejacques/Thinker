@@ -23,9 +23,7 @@ export class Player {
     deck: number[]
     constructor(hand: number[], deck: number[]) {
         this.hand = hand.slice()
-        //player.hand.map(card => new GameCard.Card(card))
         this.deck = deck.slice()
-        //player.deck.map(card => new GameCard.Card(card))
     }
     clone() {
         return new Player(this.hand, this.deck)
@@ -43,7 +41,7 @@ export enum RuleSet {
     Asc,
     Des,
     Rnd,
-    // Swap, // Don't need to worry about this since it happens at game start
+    // Swp, // Don't need to worry about this since it happens at game start
     Ord,
     Cha,
 }
@@ -62,7 +60,7 @@ export enum RuleSetFlags {
     Rnd = 1 << RuleSet.Rnd,
     Ord = 1 << RuleSet.Ord,
     Cha = 1 << RuleSet.Cha,
-    // Swap, // Don't need to worry about this since it happens at game start
+    // Swp, // Don't need to worry about this since it happens at game start
 }
 
 export class Game implements Nodes.GameNode<Game> {
