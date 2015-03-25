@@ -315,14 +315,16 @@ function getCaptures(
     if (y < 3) boardIndexes.push([downIndex, 2])
     if (x > 0) boardIndexes.push([leftIndex, 3])
 
+    // filter to only the valid board positions
+    var validBoardIndexes = boardIndexes
+        .filter(indexes => !!node.board[indexes[0]])
+
     // Only capture if the card is present and the player is different
-    var filteredBoardIndexes = boardIndexes
-        //.map((boardIndex, index) => [boardIndex, index])
-        .filter((indexes) => {
-            var boardIndex = indexes[0]
-            return node.board[boardIndex]
-                && node.board[boardIndex].player !== playerCard.player
-        })
+    var filterOtherPlayer = indexes => {
+        var boardIndex = indexes[0]
+        return node.board[boardIndex].player !== playerCard.player
+    }
+    var filteredBoardIndexes = validBoardIndexes.filter(filterOtherPlayer)
 
     var card = cardList[playerCard.card]
 
@@ -345,8 +347,9 @@ function getCaptures(
     })
 
     // Rules.Sam
+    // Can use own or opponents cards.
     if (node.rules & RuleSetFlags.Sam) {
-        var samSides = filteredBoardIndexes.filter(indexes => {
+        var samFilter = indexes => {
             var boardIndex = indexes[0]
             var sideIndex = indexes[1]
 
@@ -357,14 +360,20 @@ function getCaptures(
             var otherValue = otherCard[getOppositeSide(sideIndex)]
 
             return sideValue === otherValue
-        })
+        }
+
+        var samSides = validBoardIndexes.filter(samFilter)
 
         if (samSides.length > 1) {
-            capturedIndexes.push.apply(capturedIndexes, samSides)
+            var samFilteredSides = samSides.filter(filterOtherPlayer)
+            if (samFilteredSides.length) {
+                capturedIndexes.push.apply(capturedIndexes, samFilteredSides)
+            }
         }
     }
 
     // Rules.Plu
+    // Can use own or opponents cards.
     if (node.rules & RuleSetFlags.Plu) {
     }
 
