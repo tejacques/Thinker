@@ -12,7 +12,7 @@ var playerColor = {
 function printBoard(board: Board) {
     var sidesInRow = [[0], [3, 5, 1], [2], [4]]
     // Each row
-    console.log(Array(9 * 3 + 4).join('_'))
+    console.log(' ' + Array(9 * 3 + 3).join('_'))
     for (var boardXIndex = 0; boardXIndex < 3; boardXIndex++) {
         // Each Side-Row
         console.log('| ' + Array(3 + 1).join(' _______ ') + ' |')
@@ -51,9 +51,9 @@ function printBoard(board: Board) {
                             var end = sv === 1
                                 ? "|"
                                 : " "
-                            p += playerColor[player](start + sideVal + end)
+                            p += playerColor[player](start + chalk.bold(sideVal) + end)
                         } else {
-                            p += playerColor[player]("|   " + sideVal + "   |")
+                            p += playerColor[player]("|   " + chalk.bold(sideVal) + "   |")
                         }
                     }
                 }
@@ -61,7 +61,6 @@ function printBoard(board: Board) {
 
             console.log(p + " |")
         }
-        //console.log('| ' + Array(3 + 1).join('|_______|') + ' |')
     }
     console.log('|' + Array(9 * 3 + 3).join('_') + '|')
 }
