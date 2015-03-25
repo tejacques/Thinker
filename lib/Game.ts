@@ -41,9 +41,9 @@ export enum RuleSet {
     Asc,
     Des,
     Rnd,
-    // Swp, // Don't need to worry about this since it happens at game start
     Ord,
     Cha,
+    // Swp, // Don't need to worry about this since it happens at game start
 }
 
 export enum RuleSetFlags {
@@ -63,6 +63,8 @@ export enum RuleSetFlags {
     // Swp, // Don't need to worry about this since it happens at game start
 }
 
+type BoardCaptures = NDictionary<RuleSetFlags, number[][]>
+
 export class Game implements Nodes.GameNode<Game> {
     board: Board
     players: Player[]
@@ -74,6 +76,7 @@ export class Game implements Nodes.GameNode<Game> {
         handIndex: number
         player: number
         card: Card
+        captures: BoardCaptures
     }
     originalNode: Game
     constructor(
@@ -231,32 +234,54 @@ export class Game implements Nodes.GameNode<Game> {
             boardIndex: boardIndex,
             handIndex: handIndex,
             player: playerId,
-            card: card
+            card: card,
+            captures: {},
         }
 
         // Apply capturing logic here to alter other board playerId
         // node.board ...
         var capturedPositions = [boardIndex];
-        
+        var com = false;
+
+        var captureIndex = (index: number) => {
+            node.board[index].player = playerId
+        }
+
         // Propogate as necessary
         while (capturedPositions.length > 0) {
             var nextCapturedPositions: number[] = []
             for (var i = 0; i < capturedPositions.length; i++) {
                 var index = capturedPositions[i]
-                nextCapturedPositions = getCaptures(node, playerCard, index)
+                var captures = getCaptures(node, playerCard, index, com)
+
+                for (var rule in captures) {
+                    var ruleCaptures = node.move.captures[rule] = node.move.captures[rule] || []
+                    ruleCaptures.push(captures[rule])
+                }
+                nextCapturedPositions = []
+
+                nextCapturedPositions.push.apply(nextCapturedPositions, captures[RuleSetFlags.Sam])
+                nextCapturedPositions.push.apply(nextCapturedPositions, captures[RuleSetFlags.Plu])
+                nextCapturedPositions.push.apply(nextCapturedPositions, captures[RuleSetFlags.Com])
+
+                com = true
 
                 // Capture the positions
-                nextCapturedPositions.forEach(index => {
-                    node.board[index].player = playerId
-                })
+                nextCapturedPositions.forEach(captureIndex)
             }
 
-            // If combo is in effect, keep going!
+            // If com is in effect, keep going!
             if (node.rules & RuleSetFlags.Com) {
                 capturedPositions = nextCapturedPositions
             } else {
                 capturedPositions = []
             }
+        }
+
+        // Capture the positions
+        for (var rule in captures) {
+            var ruleCaptures = node.move.captures[rule]
+            ruleCaptures.forEach(captureLevel => captureLevel.forEach(captureIndex))
         }
 
         // Bump turn number
@@ -290,12 +315,20 @@ function getSide(side: number, offset: number) {
     return (side + offset) % 4
 }
 
+interface SDictionary<T extends string, U> {
+    [key: string]: U
+}
+
+interface NDictionary<T extends number, U> {
+    [key: number]: U
+}
+
 function getCaptures(
     node: Game,
     playerCard: PlayerCard,
-    index: number
-    ): number[] {
-    var capturedIndexes: number[] = []
+    index: number,
+    com: boolean): NDictionary<RuleSetFlags, number[]> {
+    var capturedIndexes: NDictionary<RuleSetFlags, number[]> = {}
 
     if (!playerCard) {
         return capturedIndexes
@@ -329,6 +362,7 @@ function getCaptures(
     var card = cardList[playerCard.card]
 
     // Basic rule
+    var basicCaptures = []
     filteredBoardIndexes.forEach(indexes => {
         var boardIndex = indexes[0]
         var sideIndex = indexes[1]
@@ -342,13 +376,19 @@ function getCaptures(
         var rev = node.rules & RuleSetFlags.Rev
         if (rev && sideValue < otherValue
             || !rev && sideValue > otherValue) {
-            capturedIndexes.push(boardIndex)
+            basicCaptures.push(boardIndex)
         }
     })
 
+    if (basicCaptures.length) {
+        var ruleSet = node.rules & ~RuleSetFlags.Com
+        capturedIndexes[ruleSet] = basicCaptures
+    }
+
+    var samCaptures = []
     // Rules.Sam
     // Can use own or opponents cards.
-    if (node.rules & RuleSetFlags.Sam) {
+    if (!com && (node.rules & RuleSetFlags.Sam)) {
         var samFilter = indexes => {
             var boardIndex = indexes[0]
             var sideIndex = indexes[1]
@@ -367,14 +407,59 @@ function getCaptures(
         if (samSides.length > 1) {
             var samFilteredSides = samSides.filter(filterOtherPlayer)
             if (samFilteredSides.length) {
-                capturedIndexes.push.apply(capturedIndexes, samFilteredSides)
+                capturedIndexes[RuleSetFlags.Sam] = samFilteredSides.map(s => s[0])
             }
         }
     }
 
     // Rules.Plu
     // Can use own or opponents cards.
-    if (node.rules & RuleSetFlags.Plu) {
+    if (!com && (node.rules & RuleSetFlags.Plu)) {
+        var pluMap = indexes => {
+            var boardIndex = indexes[0]
+            var sideIndex = indexes[1]
+
+            var sideCard = node.board[boardIndex]
+            var otherCard = cardList[sideCard.card]
+
+            var sideValue = card.sides[sideIndex];
+            var otherValue = otherCard[getOppositeSide(sideIndex)]
+
+            return sideValue + otherValue
+        }
+
+        var pluReducer = (
+            accumulator: NDictionary<number, number[]>,
+            value,
+            index: number) => {
+            var accVal = accumulator[value] = accumulator[value] || []
+            accVal.push(index)
+            return accumulator
+        }
+
+        // Get the sum of each pair
+        // Get the list of indexes in validBoardIndexes with that sum
+        var pluSides: NDictionary<number, number[]> = validBoardIndexes
+            .map(pluMap)
+            .reduce(pluReducer, {})
+
+        var pluIndexes: number[] = []
+        for (var sum in pluSides) {
+            if (pluSides.hasOwnProperty(sum)) {
+                if (pluSides[sum].length > 1) {
+                    pluIndexes.push.apply(pluIndexes, pluSides[sum])
+                }
+            }
+        }
+
+        if (pluIndexes.length > 1) {
+            var pluFilteredSides = pluIndexes
+                .map(index => boardIndexes[index])
+                .filter(filterOtherPlayer)
+            if (pluFilteredSides.length) {
+                capturedIndexes[RuleSetFlags.Plu] = pluFilteredSides.map(s => s[0])
+            }
+        }
     }
 
     return capturedIndexes
