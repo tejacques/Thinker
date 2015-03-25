@@ -33,7 +33,7 @@ describe("Negamax", () => {
             expect(move.player).to.be(0)
             expect(move.card.number).to.be(10)
             expect(playerValue).to.be(5)
-            //expect(gns.score).to.be(5)
+            expect(gns.score).to.be(1)
         });
 
         it("should pick card 12 in boardIndex 0",() => {
@@ -62,7 +62,7 @@ describe("Negamax", () => {
             expect(move.player).to.be(0)
             expect(move.card.number).to.be(12)
             expect(playerValue).to.be(6)
-            //expect(gns.score).to.be(6)
+            expect(gns.score).to.be(3)
         });
 
         it("should pick card 12 in boardIndex 1",() => {
@@ -71,7 +71,7 @@ describe("Negamax", () => {
                 null,                      new game.PlayerCard(1, 1), new game.PlayerCard(1, 1),
                 new game.PlayerCard(1, 1), new game.PlayerCard(1, 0), new game.PlayerCard(1, 1),
             ]
-            var player1 = new game.Player([1, 12, null, null], [])
+            var player1 = new game.Player([1, 9, 12, null, null], [])
             var player2 = new game.Player([1, null, null, null, null], [])
             var gameNode = new game.Game(
                 board,
@@ -85,6 +85,14 @@ describe("Negamax", () => {
             var move = gns.node.originalNode.move;
             var value = gns.node.value()
             var playerValue = gns.node.originalNode.playerValue(0)
+
+            expect(move.boardIndex).to.be(1)
+            expect(move.card.number).to.be(12)
+            expect(move.handIndex).to.be(player1.hand.indexOf(12))
+            expect(move.player).to.be(0)
+            expect(value).to.be(1)
+            expect(gns.score).to.be(3)
+            expect(playerValue).to.be(4)
 
             var gns2 = negamax(gns.node, { depth: 10, color: -1 })
             var move2 = gns2.node.originalNode.move
@@ -101,13 +109,6 @@ describe("Negamax", () => {
             printBoard(gns.node.originalNode.board)
             printBoard(gns2.node.originalNode.board)
             printBoard(gns3.node.originalNode.board)
-
-            expect(move.boardIndex).to.be(1)
-            expect(move.handIndex).to.be(2)
-            expect(move.player).to.be(0)
-            expect(move.card.number).to.be(12)
-            expect(value).to.be(4)
-            expect(gns.score).to.be(6)
         })
 
         it("should pick card 12 in 1",() => {
