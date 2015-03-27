@@ -98,7 +98,11 @@ export class Game implements Nodes.GameNode<Game> {
     getPlayer() {
         return this.players[this.getPlayerId()]
     }
+    private _value: number = -10
     value() {
+        if (this._value > -10) {
+            return this._value
+        }
         // This always scores the value for the first player
         var val = 0;
         var playerId = this.getPlayerId()
@@ -109,6 +113,7 @@ export class Game implements Nodes.GameNode<Game> {
             }
         })
 
+        this._value = val
         return val
     }
     playerValue(playerId: number) {

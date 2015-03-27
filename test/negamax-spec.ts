@@ -4,9 +4,9 @@ import game = require('../lib/Game')
 import negamax = require('../lib/Negamax')
 import printBoard = require('../lib/PrintBoard')
 
-describe("Negamax", () => {
+describe('Negamax', () => {
     
-    describe("Game", function () {
+    describe('Game', function () {
         it("should pick card 10 in boardIndex 0",() => {
             var board = [
                 null,                      new game.PlayerCard(1, 1), new game.PlayerCard(1, 1),
@@ -23,7 +23,7 @@ describe("Negamax", () => {
                 game.RuleSetFlags.None
             )
 
-            var gns = negamax(gameNode, { depth: 1, color: 1 })
+            var gns = negamax(gameNode, 10, -Infinity, Infinity, 1)
             var move = gns.node.originalNode.move;
             var value = gns.node.value()
             var playerValue = gns.node.originalNode.playerValue(0)
@@ -52,7 +52,7 @@ describe("Negamax", () => {
                 game.RuleSetFlags.None
             )
 
-            var gns = negamax(gameNode, { depth: 1, color: 1 })
+            var gns = negamax(gameNode, 1, -Infinity, Infinity, 1)
             var move = gns.node.originalNode.move;
             var value = gns.node.value()
             var playerValue = gns.node.originalNode.playerValue(0)
@@ -81,7 +81,7 @@ describe("Negamax", () => {
                 game.RuleSetFlags.None
                 )
 
-            var gns = negamax(gameNode, { depth: 10, color: 1 })
+            var gns = negamax(gameNode, 10, -Infinity, Infinity, 1)
             var move = gns.node.originalNode.move;
             var value = gns.node.value()
             var playerValue = gns.node.originalNode.playerValue(0)
@@ -127,7 +127,7 @@ describe("Negamax", () => {
                 game.RuleSetFlags.None
                 )
 
-            var gns = negamax(gameNode, { depth: 10, color: 1 })
+            var gns = negamax(gameNode, 10, -Infinity, Infinity, 1)
             var move = gns.node.originalNode.move;
             var value = gns.node.value()
             var playerValue = gns.node.originalNode.playerValue(0)

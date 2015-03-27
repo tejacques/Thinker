@@ -128,6 +128,7 @@
     <Content Include="assets\img\type\4.png" />
     <TypeScriptCompile Include="lib\PrintBoard.ts" />
     <TypeScriptCompile Include="lib\Range.ts" />
+    <TypeScriptCompile Include="test\NegaScout-spec.ts" />
     <TypeScriptCompile Include="typings\chalk\chalk.d.ts" />
     <TypeScriptCompile Include="typings\expect.js\expect.js.d.ts" />
     <TypeScriptCompile Include="typings\mocha\mocha.d.ts" />

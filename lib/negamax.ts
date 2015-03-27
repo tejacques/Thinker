@@ -8,8 +8,8 @@ function negamax<T extends game.GameNode<any>> (
     alpha: number,
     beta: number,
     color: number,
-    time: number,
-    start: number) {
+    time?: number,
+    start?: number) {
     'use strict'
 
     var best: game.GameNodeScore<T> = {
@@ -17,7 +17,7 @@ function negamax<T extends game.GameNode<any>> (
         score: -Infinity
     }
 
-    if (time) {
+    if (time && start) {
         var now = +new Date()
         var elapsed = now - start
         if (elapsed >= time) {
@@ -55,18 +55,4 @@ function negamax<T extends game.GameNode<any>> (
     return best
 }
 
-function negamaxWrapper<T extends game.GameNode<any>>(
-    node: game.GameNode<T>,
-    options?: Options
-    ): game.GameNodeScore<T> {
-    
-    var opts = options || <Options>{}
-    var color = opts.color || -1
-    var depth = opts.depth || 10
-    var time = opts.time || 0
-    var start = +new Date()
-
-    return negamax(node, depth, -Infinity, Infinity, color, time, start)
-}
-
-export = negamaxWrapper
+export = negamax
