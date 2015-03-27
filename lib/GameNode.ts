@@ -13,11 +13,12 @@ export interface GameNode<T extends GameNode<any>> extends Node {
 }
 
 export interface GameNodeScore<T extends GameNode<any>> {
-    score: number;
+    score: number
     node: GameNode<T>
 }
 
 export interface Options {
-    color?: number;
-    depth?: number;
+    color?: number
+    depth?: number
+    time?: number
 }

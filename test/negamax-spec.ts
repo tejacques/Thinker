@@ -1,7 +1,7 @@
 ﻿import expect = require('expect.js');
 
 import game = require('../lib/Game')
-import negamax = require('../lib/negamax')
+import negamax = require('../lib/Negamax')
 import printBoard = require('../lib/PrintBoard')
 
 describe("Negamax", () => {

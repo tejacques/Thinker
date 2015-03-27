@@ -1,6 +1,6 @@
 ﻿import Nodes = require('./GameNode')
 import GameCard = require('./GameCard')
-import range = require('./range')
+import range = require('./Range')
 var cardList = GameCard.cardList
 type Card = GameCard.Card
 
@@ -287,6 +287,20 @@ export class Game implements Nodes.GameNode<Game> {
         // Bump turn number
         node.turn++
         return node
+    }
+    toString() {
+        // Retun a JSON representation of the board without metadata
+        var s = '{'
+        // Player info
+        s+= 'P:'+JSON.stringify(this.players)
+
+        // Board info
+        s+= ',B:'+JSON.stringify(this.board)
+
+        // Close
+        s += '}'
+
+        return s
     }
 }
 

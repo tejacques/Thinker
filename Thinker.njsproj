@@ -24,7 +24,8 @@
     <TypeScriptCompile Include="lib\GameCard.ts" />
     <TypeScriptCompile Include="lib\Game.ts" />
     <TypeScriptCompile Include="lib\GameNode.ts" />
-    <TypeScriptCompile Include="lib\negamax.ts" />
+    <TypeScriptCompile Include="lib\IIDNegaScout.ts" />
+    <TypeScriptCompile Include="lib\Negamax.ts" />
     <Content Include="assets\img\bg.png" />
     <Content Include="assets\img\face\001.png" />
     <Content Include="assets\img\face\002.png" />
