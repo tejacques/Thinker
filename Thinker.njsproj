@@ -21,11 +21,12 @@
   <ItemGroup>
     <Content Include="index.html" />
     <Content Include="package.json" />
+    <TypeScriptCompile Include="lib\ArrayUtils.ts" />
     <TypeScriptCompile Include="lib\GameCard.ts" />
     <TypeScriptCompile Include="lib\Game.ts" />
     <TypeScriptCompile Include="lib\GameNode.ts" />
     <TypeScriptCompile Include="lib\IIDNegaScout.ts" />
-    <TypeScriptCompile Include="lib\Negamax.ts" />
+    <TypeScriptCompile Include="lib\NegaMax.ts" />
     <Content Include="assets\img\bg.png" />
     <Content Include="assets\img\face\001.png" />
     <Content Include="assets\img\face\002.png" />
@@ -128,12 +129,18 @@
     <Content Include="assets\img\type\4.png" />
     <TypeScriptCompile Include="lib\PrintBoard.ts" />
     <TypeScriptCompile Include="lib\Range.ts" />
-    <TypeScriptCompile Include="test\NegaScout-spec.ts" />
+    <TypeScriptCompile Include="test\Benchmark.ts">
+      <TestFramework>Mocha</TestFramework>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="test\NegaScout-spec.ts">
+      <TestFramework>Mocha</TestFramework>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="test\TestVars.ts" />
     <TypeScriptCompile Include="typings\chalk\chalk.d.ts" />
     <TypeScriptCompile Include="typings\expect.js\expect.js.d.ts" />
     <TypeScriptCompile Include="typings\mocha\mocha.d.ts" />
     <TypeScriptCompile Include="typings\node\node.d.ts" />
-    <TypeScriptCompile Include="test\negamax-spec.ts">
+    <TypeScriptCompile Include="test\NegaMax-spec.ts">
       <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>
     </TypeScriptCompile>

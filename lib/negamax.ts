@@ -14,6 +14,7 @@ function negamax<T extends game.GameNode<any>> (
 
     var best: game.GameNodeScore<T> = {
         node: null,
+        endNode: null,
         score: -Infinity
     }
 
@@ -27,6 +28,7 @@ function negamax<T extends game.GameNode<any>> (
 
     if (depth === 0 || node.isTerminal()) {
         best.node = node
+        best.endNode = node
         best.score = color * node.value()
 
         return best
@@ -40,6 +42,7 @@ function negamax<T extends game.GameNode<any>> (
         if (value > best.score) {
             best.score = value
             best.node = child
+            best.endNode = ns.endNode
         }
         alpha = Math.max(alpha, value)
         if (alpha >= beta) {

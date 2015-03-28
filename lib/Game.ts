@@ -66,6 +66,7 @@ export enum RuleSetFlags {
 type BoardCaptures = NDictionary<RuleSetFlags, number[][]>
 
 export class Game implements Nodes.GameNode<Game> {
+    parent: Game
     board: Board
     players: Player[]
     firstMove: number
@@ -84,13 +85,15 @@ export class Game implements Nodes.GameNode<Game> {
         players: Player[],
         turn: number,
         firstMove: number,
-        rules: RuleSetFlags) {
+        rules: RuleSetFlags,
+        parent?: Game) {
         this.board = board.map((card) => card? card.clone() : null)
         this.players = players.map((player) => player.clone())
         this.turn = turn;
         this.firstMove = firstMove
         this.rules = rules
         this.originalNode = this
+        this.parent = parent || null
     }
     getPlayerId() {
         return (this.turn + this.firstMove) % this.players.length
@@ -127,7 +130,8 @@ export class Game implements Nodes.GameNode<Game> {
         return val
     }
     isTerminal() {
-        return this.board.filter(spot => !spot).length === 0
+        return this.turn === 9
+        //return this.board.filter(spot => !spot).length === 0
     }
     getMoveIterator() {
         // Can:
@@ -152,7 +156,7 @@ export class Game implements Nodes.GameNode<Game> {
         // Valid hand indexes are any non nulls
         var handIndexes = getIndexes(player.hand, item => item !== null)
         // Valid deck indexes are any
-        var deckIndexes = range(0, player.deck.length)
+        var deckIndexes = range(player.deck.length)
         // Valid board indexes are nulls (unplayed positions)
         var boardIndexes = getIndexes(this.board, item => !item)
         var lookedThroughDeck = false;
@@ -216,6 +220,7 @@ export class Game implements Nodes.GameNode<Game> {
     }
     playCard(handIndex: number, deckIndex: number, boardIndex: number): Game {
         var node = this.clone()
+        node.parent = this
         var playerId = node.getPlayerId()
         var player = node.players[playerId]
 
@@ -223,16 +228,26 @@ export class Game implements Nodes.GameNode<Game> {
         var handId = player.hand[handIndex]
         var deckId = player.deck[deckIndex]
         var cardId = handId || deckId
+        var card = cardList[cardId]
 
         // Remove card from player's hand. A value of null means that card has been played
         player.hand[handIndex] = null
-        // Delete card from player's deck
-        if (player.deck.length && handId === 0) {
-            player.deck = player.deck.splice(deckIndex, 1)
+
+        // Remove card from player's deck, as well as any card that break the rarity rule
+        if (player.deck.length) {
+            if (card.rarity > 3) {
+                var lastDeckID = player.deck[player.deck.length - 1]
+                var lastDeckCard = cardList[lastDeckID]
+                if (lastDeckCard.rarity > 3) {
+                    player.deck = player.deck.filter(id => cardList[id].rarity <= 3)
+                }
+            }
+            if (handId === 0) {
+                player.deck = player.deck.splice(deckIndex, 1)
+            }
         }
         // Place the card on the board
         var playerCard = node.board[boardIndex] = new PlayerCard(cardId, playerId)
-        var card = cardList[playerCard.card]
 
         // Set the move
         node.move = {
@@ -307,23 +322,16 @@ export class Game implements Nodes.GameNode<Game> {
 
         return s
     }
-}
+    history() {
+        var sequence: Game[] = []
 
-var captures = (card: PlayerCard, other: PlayerCard, side: number) => {
-    if (!card || !other || !side) {
-        return false
-    }
-    if (card.player === other.player) {
-        return false
-    }
+        var last = this
+        do {
+            sequence.push(last)
+        } while (last = last.parent)
 
-    var c = cardList[card.card]
-    var o = cardList[other.card]
-    if (c.sides[side] > o.sides[(side + 2) % 4]) {
-        return true
+        return sequence.reverse()
     }
-
-    return false
 }
 
 function getOppositeSide(side: number) {

@@ -15,6 +15,7 @@ export interface GameNode<T extends GameNode<any>> extends Node {
 export interface GameNodeScore<T extends GameNode<any>> {
     score: number
     node: GameNode<T>
+    endNode: GameNode<T>
 }
 
 export interface Options {
