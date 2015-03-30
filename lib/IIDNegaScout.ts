@@ -190,20 +190,24 @@ function NegaScout<T extends game.GameNode<any>>(
         return best
     }
 
+    var startingAlpha = alpha
+
     for (var newDepth = 0; newDepth < maxDepth; newDepth++) {
 
         children.sort(childrenSort)
 
-        //var nextBest: game.GameNodeScore<T> = {
-        //    node: null,
-        //    endNode: null,
-        //    score: -Infinity
-        //}
+        var nextBest: game.GameNodeScore<T> = {
+            node: null,
+            endNode: null,
+            score: -Infinity
+        }
 
-        childVal = children[0]
-        best.node = childVal[0]
-        best.endNode = childVal[2]
-        best.score = childVal[1]
+        //childVal = children[0]
+        //best.node = childVal[0]
+        //best.endNode = childVal[2]
+        //best.score = childVal[1]
+
+        alpha = startingAlpha
         
         for (var c = 0; c < cl; c++) {
             childVal = children[c]
@@ -225,16 +229,16 @@ function NegaScout<T extends game.GameNode<any>>(
             var value = ns.score
             childVal[1] = value
             childVal[2] = ns.endNode
-            //if (value > nextBest.score) {
-            //    nextBest.score = value
-            //    nextBest.endNode = ns.endNode
-            //    nextBest.node = child
-            //}
-            if (value > best.score) {
-                best.score = value
-                best.endNode = ns.endNode
-                best.node = child
+            if (value > nextBest.score) {
+                nextBest.score = value
+                nextBest.endNode = ns.endNode
+                nextBest.node = child
             }
+            //if (value > best.score) {
+            //    best.score = value
+            //    best.endNode = ns.endNode
+            //    best.node = child
+            //}
 
             alpha = Math.max(alpha, value)
             if (alpha >= beta) {
@@ -247,7 +251,7 @@ function NegaScout<T extends game.GameNode<any>>(
             }
         }
 
-        //best = nextBest
+        best = nextBest
 
     }
 
