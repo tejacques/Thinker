@@ -19,19 +19,19 @@ describe('Benchmark',function() {
     this.timeout(0)
 
     it('should take less time to run NegaScout than NegaMax',() => {
-        var gameNode = testVars.TestGame[6]
+        var gameNode = testVars.TestGame[5]
 
-        var gnsNS: GameNode.GameNodeScore<game.Game>
-        var nsTime = time(() => {
-            gnsNS = NegaScout(gameNode, 10, -Infinity, Infinity, 1)
-        })
+        //var gnsNS: GameNode.GameNodeScore<game.Game>
+        //var nsTime = time(() => {
+        //    gnsNS = NegaScout(gameNode, 10, -Infinity, Infinity, 1)
+        //})
 
-        console.log('NegaScout score: ' + gnsNS.score + ', board (' + nsTime + 'ms):')
+        //console.log('NegaScout score: ' + gnsNS.score + ', board (' + nsTime + 'ms):')
 
-        gnsNS.endNode.originalNode.history().forEach((n) => {
-            printBoard(n.board)
-            console.log();
-        })
+        //gnsNS.endNode.originalNode.history().forEach((n) => {
+        //    printBoard(n.board)
+        //    console.log();
+        //})
         //printBoard(gnsNS.node.originalNode.board)
 
         var gnsNM: GameNode.GameNodeScore<game.Game>

@@ -129,6 +129,7 @@
     <Content Include="assets\img\type\4.png" />
     <TypeScriptCompile Include="lib\PrintBoard.ts" />
     <TypeScriptCompile Include="lib\Range.ts" />
+    <TypeScriptCompile Include="lib\TranspositionTable.ts" />
     <TypeScriptCompile Include="test\Benchmark.ts">
       <TestFramework>Mocha</TestFramework>
     </TypeScriptCompile>
@@ -138,6 +139,7 @@
     <TypeScriptCompile Include="test\TestVars.ts" />
     <TypeScriptCompile Include="typings\chalk\chalk.d.ts" />
     <TypeScriptCompile Include="typings\expect.js\expect.js.d.ts" />
+    <TypeScriptCompile Include="typings\lru-cache\lru-cache.d.ts" />
     <TypeScriptCompile Include="typings\mocha\mocha.d.ts" />
     <TypeScriptCompile Include="typings\node\node.d.ts" />
     <TypeScriptCompile Include="test\NegaMax-spec.ts">
@@ -158,6 +160,7 @@
     <Folder Include="test\" />
     <Folder Include="typings\" />
     <Folder Include="typings\chalk\" />
+    <Folder Include="typings\lru-cache\" />
     <Folder Include="typings\node\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
