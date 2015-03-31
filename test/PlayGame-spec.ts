@@ -17,7 +17,7 @@ describe("Play Game",function() {
             gamePlayer.rules.forEach(rule => rules+=rule)
             var firstMove = true
             var player1DeckKnown = true
-            var player2DeckKnown = true
+            var player2DeckKnown = false
 
             var nodes = PlayGame(player1, player2, firstMove, rules, player1DeckKnown, player2DeckKnown, NegaMax, NegaMax, 100, 60000)
             var p1node = nodes[0]

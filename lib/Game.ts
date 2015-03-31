@@ -164,7 +164,7 @@ export class Game implements Nodes.GameNode<Game> {
             }
         })
 
-        val -= (this.firstMove-1)
+        val += this.firstMove-1
 
         this._value = val
         return val

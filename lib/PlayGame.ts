@@ -53,6 +53,7 @@ function PlayGame(
         var move = games[turn].move
         games[otherTurn] = other.playCard(move.handIndex, null, move.boardIndex)
 
+        console.log()
         console.log('Score for player1: ' + games[turn].value())
         PrintBoard(games[turn].board)
     }
