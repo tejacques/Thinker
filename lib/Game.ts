@@ -60,7 +60,7 @@ function legalDeckFilter(hand: number[], deck: number[]) {
     var hasRareCard = maxRarity >= 4
     return deck.filter(deckId =>
         !(deckId in handDict)
-        && (hasRareCard && cardList[deckId].rarity < 4))
+        && (!hasRareCard || cardList[deckId].rarity < 4))
 }
 
 export class Player {

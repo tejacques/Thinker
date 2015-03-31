@@ -14,26 +14,48 @@ describe("Play Game",function() {
             var gamePlayer = GamePlayers[0]
             var player2 = new Game.Player(gamePlayer.deck, gamePlayer.deck)
             var rules = 0
-            gamePlayer.rules.forEach(rule => rules+=rule)
+            //gamePlayer.rules.forEach(rule => rules+=rule)
             var firstMove = true
             var player1DeckKnown = true
             var player2DeckKnown = false
 
-            var nodes = PlayGame(player1, player2, firstMove, rules, player1DeckKnown, player2DeckKnown, NegaMax, NegaMax, 100, 60000)
+            var nodes = PlayGame(
+                starterDeck,
+                starterDeck,
+                gamePlayer.deck,
+                gamePlayer.deck,
+                firstMove,
+                rules,
+                player1DeckKnown,
+                player2DeckKnown,
+                NegaMax,
+                NegaMax,
+                100,
+                5000)
             var p1node = nodes[0]
             var p2node = nodes[1]
         })
         it("should lose against Game Player 0 when playing second",() => {
-            var player1 = new Game.Player(starterDeck, starterDeck)
             var gamePlayer = GamePlayers[0]
-            var player2 = new Game.Player(gamePlayer.deck, gamePlayer.deck)
             var rules = 0
             gamePlayer.rules.forEach(rule => rules += rule)
             var firstMove = false
             var player1DeckKnown = true
             var player2DeckKnown = true
 
-            var nodes = PlayGame(player1, player2, firstMove, rules, player1DeckKnown, player2DeckKnown, NegaMax, NegaMax, 60000, 100)
+            var nodes = PlayGame(
+                starterDeck,
+                starterDeck,
+                gamePlayer.deck,
+                gamePlayer.deck,
+                firstMove,
+                rules,
+                player1DeckKnown,
+                player2DeckKnown,
+                NegaMax,
+                NegaMax,
+                100,
+                60000)
             var p1node = nodes[0]
             var p2node = nodes[1]
         })

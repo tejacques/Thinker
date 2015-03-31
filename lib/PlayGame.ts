@@ -5,8 +5,10 @@ import IterativeDeepening = require('./IterativeDeepening')
 import PrintBoard = require('./PrintBoard')
 
 function PlayGame(
-    player1: Game.Player,
-    player2: Game.Player,
+    player1Hand: number[],
+    player1Deck: number[],
+    player2Hand: number[],
+    player2Deck: number[],
     firstMove: boolean,
     rules: Game.RuleSetFlags,
     player1DeckKnown: boolean,
@@ -17,15 +19,22 @@ function PlayGame(
     player2Time: number
     ) {
 
+    var player1 = new Game.Player(player1Hand, player1Deck)
+    var player2 = new Game.Player(player2Hand, player2Deck)
     var allCardIds = Range(1, 80)
+    var closedHand = [0,0,0,0,0]
     var moveOffset = firstMove ? 0 : 1
 
     var p1Player2 = new Game.Player(
-        player2.hand,
-        player2DeckKnown ? player2.deck : allCardIds)
+        rules & Game.RuleSetFlags.AO
+            ? player2Hand
+            : closedHand,
+        player2DeckKnown ? player2Deck : allCardIds)
     var p2Player1 = new Game.Player(
-        player1.hand,
-        player1DeckKnown ? player1.deck : allCardIds)
+        rules & Game.RuleSetFlags.AO
+            ? player1Hand
+            : closedHand,
+        player1DeckKnown ? player1Deck : allCardIds)
 
     var p1Game = new Game.Game(Game.newBoard(), [player1, p1Player2],
         0,
@@ -49,9 +58,12 @@ function PlayGame(
         var color = moveOffset === turn ? 1 : -1
 
         var next = IterativeDeepening(node, AI[turn], 9, color, times[turn])
-        games[turn] = next.node.originalNode
-        var move = games[turn].move
-        games[otherTurn] = other.playCard(move.handIndex, null, move.boardIndex)
+        var newNode = next.node.originalNode
+        var move = newNode.move
+        var cardId = games[turn].players[turn].hand[move.handIndex]
+        games[turn] = newNode
+        var deckIndex = games[otherTurn].players[turn].deck.indexOf(cardId)
+        games[otherTurn] = other.playCard(move.handIndex, deckIndex, move.boardIndex)
 
         console.log()
         console.log('Score for player1: ' + games[turn].value())
