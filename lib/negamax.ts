@@ -1,20 +1,20 @@
-import game = require('./GameNode')
+import GameNode = require('./GameNode')
 import TT = require('./TranspositionTable')
-type Options = game.Options
 
 // Source: http://wikipedia.org/wiki/Negamax
-function negamax<T extends game.GameNode<any>> (
-    node: game.GameNode<T>,
+function NegaMax<T extends GameNode.GameNode<any>> (
+    node: GameNode.GameNode<T>,
     depth: number,
     alpha: number,
     beta: number,
     color: number,
     time?: number,
     start?: number,
-    ttable?: TT.TranspositionTable<game.GameNode<T>>) {
+    ttable?: TT.TranspositionTable<GameNode.GameNode<T>>
+    ) {
     'use strict'
 
-    var best: game.GameNodeScore<T> = {
+    var best: GameNode.GameNodeScore<T> = {
         node: null,
         endNode: null,
         score: -Infinity
@@ -28,15 +28,17 @@ function negamax<T extends game.GameNode<any>> (
         }
     }
 
-    //ttable = ttable || new TT.TranspositionTable<T>(50000)
     var alphaOrig = alpha
+    var ttEntry: TT.Entry<GameNode.GameNode<T>>
 
     if (ttable) {
-        var ttEntry = ttable.get(node)
+        ttEntry = ttable.get(node)
         if (ttEntry && ttEntry.depth >= depth) {
             if (ttEntry.flag === TT.Flag.Exact) {
             } else if (ttEntry.flag === TT.Flag.Lowerbound) {
+                alpha = Math.max(alpha, ttEntry.value)
             } else if (ttEntry.flag === TT.Flag.Upperbound) {
+                beta = Math.min(beta, ttEntry.value)
             }
 
             if (alpha >= beta) {
@@ -56,10 +58,16 @@ function negamax<T extends game.GameNode<any>> (
         return best
     }
     var iterator = node.getMoveIterator()
-    var child: game.GameNode<T>
+    var child: GameNode.GameNode<T>
     while ((child = iterator.getNext())) {
-        var ns = negamax(child, depth - 1, -beta, -alpha, -color, time, start, ttable)
+        var ns = NegaMax(child, depth - 1, -beta, -alpha, -color, time, start, ttable)
         ns.score = -ns.score
+
+        // If the node is null, we ran out of time
+        if (ns.node === null) {
+            break
+        }
+
         var value = ns.score
         if (value > best.score) {
             best.score = value
@@ -70,16 +78,11 @@ function negamax<T extends game.GameNode<any>> (
         if (alpha >= beta) {
             break
         }
-
-        // If the node is null, we ran out of time
-        if (ns.node === null) {
-            break
-        }
     }
 
     // Transposition Table Store
     if (ttable) {
-        ttEntry = ttEntry || <TT.Entry<game.GameNode<T>>>{}
+        ttEntry = ttEntry || <TT.Entry<GameNode.GameNode<T>>>{}
         ttEntry.node = node
         ttEntry.endNode = best.endNode
         ttEntry.value = best.score
@@ -97,4 +100,4 @@ function negamax<T extends game.GameNode<any>> (
     return best
 }
 
-export = negamax
+export = NegaMax

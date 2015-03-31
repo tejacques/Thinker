@@ -2,8 +2,8 @@
 
 import game = require('../lib/Game')
 import testVars = require('./TestVars')
-import negamax = require('../lib/Negamax')
-import NegaScout = require('../lib/IIDNegaScout')
+import NegaMax = require('../lib/Negamax')
+import NegaScout = require('../lib/NegaScout')
 import printBoard = require('../lib/PrintBoard')
 
 describe('NegaScout',() => {

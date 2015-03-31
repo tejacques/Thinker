@@ -25,7 +25,9 @@
     <TypeScriptCompile Include="lib\GameCard.ts" />
     <TypeScriptCompile Include="lib\Game.ts" />
     <TypeScriptCompile Include="lib\GameNode.ts" />
-    <TypeScriptCompile Include="lib\IIDNegaScout.ts" />
+    <TypeScriptCompile Include="lib\GamePlayers.ts" />
+    <TypeScriptCompile Include="lib\NegaScout.ts" />
+    <TypeScriptCompile Include="lib\IterativeDeepening.ts" />
     <TypeScriptCompile Include="lib\NegaMax.ts" />
     <Content Include="assets\img\bg.png" />
     <Content Include="assets\img\face\001.png" />
@@ -127,6 +129,7 @@
     <Content Include="assets\img\type\2.png" />
     <Content Include="assets\img\type\3.png" />
     <Content Include="assets\img\type\4.png" />
+    <TypeScriptCompile Include="lib\PlayGame.ts" />
     <TypeScriptCompile Include="lib\PrintBoard.ts" />
     <TypeScriptCompile Include="lib\Range.ts" />
     <TypeScriptCompile Include="lib\TranspositionTable.ts" />
@@ -134,6 +137,10 @@
       <TestFramework>Mocha</TestFramework>
     </TypeScriptCompile>
     <TypeScriptCompile Include="test\NegaScout-spec.ts">
+      <TestFramework>Mocha</TestFramework>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="test\PlayGame-spec.ts">
+      <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>
     </TypeScriptCompile>
     <TypeScriptCompile Include="test\TestVars.ts" />

@@ -2,7 +2,7 @@
 
 import game = require('../lib/Game')
 import testVars = require('./TestVars')
-import negamax = require('../lib/Negamax')
+import NegaMax = require('../lib/NegaMax')
 import printBoard = require('../lib/PrintBoard')
 
 describe('Negamax', () => {
@@ -11,7 +11,7 @@ describe('Negamax', () => {
         it("should pick card 10 in boardIndex 0",() => {
             var gameNode = testVars.TestGame[0]
 
-            var gns = negamax(gameNode, 10, -Infinity, Infinity, 1)
+            var gns = NegaMax(gameNode, 10, -Infinity, Infinity, 1)
             var move = gns.node.originalNode.move;
             var value = gns.node.value()
             var playerValue = gns.node.originalNode.playerValue(0)
@@ -27,7 +27,7 @@ describe('Negamax', () => {
         it("should pick card 12 in boardIndex 0",() => {
             var gameNode = testVars.TestGame[1]
 
-            var gns = negamax(gameNode, 1, -Infinity, Infinity, 1)
+            var gns = NegaMax(gameNode, 1, -Infinity, Infinity, 1)
             var move = gns.node.originalNode.move;
             var value = gns.node.value()
             var playerValue = gns.node.originalNode.playerValue(0)
@@ -43,7 +43,7 @@ describe('Negamax', () => {
         it("should pick card 12 in boardIndex 1",() => {
             var gameNode = testVars.TestGame[2]
 
-            var gns = negamax(gameNode, 10, -Infinity, Infinity, 1)
+            var gns = NegaMax(gameNode, 10, -Infinity, Infinity, 1)
             var move = gns.node.originalNode.move;
             var value = gns.node.value()
             var playerValue = gns.node.originalNode.playerValue(0)
@@ -60,7 +60,7 @@ describe('Negamax', () => {
         it("should pick card 12 in boardIndex 1 again",() => {
             var gameNode = testVars.TestGame[3]
 
-            var gns = negamax(gameNode, 10, -Infinity, Infinity, 1)
+            var gns = NegaMax(gameNode, 10, -Infinity, Infinity, 1)
             var move = gns.node.originalNode.move;
             var value = gns.node.value()
             var playerValue = gns.node.originalNode.playerValue(0)

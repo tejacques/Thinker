@@ -1,10 +1,12 @@
 ﻿import expect = require('expect.js');
 
-import game = require('../lib/Game')
+import Game = require('../lib/Game')
 import GameNode = require('../lib/GameNode')
 import testVars = require('./TestVars')
-import negamax = require('../lib/Negamax')
-import NegaScout = require('../lib/IIDNegaScout')
+import NegaMax = require('../lib/NegaMax')
+import NegaScout = require('../lib/NegaScout')
+import IterativeDeepening = require('../lib/IterativeDeepening')
+import TT = require('../lib/TranspositionTable')
 import printBoard = require('../lib/PrintBoard')
 
 function time(fn) {
@@ -20,23 +22,34 @@ describe('Benchmark',function() {
 
     it('should take less time to run NegaScout than NegaMax',() => {
         var gameNode = testVars.TestGame[5]
+        var ttable = new TT.TranspositionTable(50000)
 
-        //var gnsNS: GameNode.GameNodeScore<game.Game>
-        //var nsTime = time(() => {
-        //    gnsNS = NegaScout(gameNode, 10, -Infinity, Infinity, 1)
-        //})
+        var gns: GameNode.GameNodeScore<Game.Game>
+        var gnsTime = time(() => {
+            gns = IterativeDeepening(gameNode, NegaMax, 10, 0)
+        })
 
-        //console.log('NegaScout score: ' + gnsNS.score + ', board (' + nsTime + 'ms):')
+        console.log('Score: ' + gns.score + ', board (' + gnsTime + 'ms):')
 
-        //gnsNS.endNode.originalNode.history().forEach((n) => {
-        //    printBoard(n.board)
-        //    console.log();
-        //})
-        //printBoard(gnsNS.node.originalNode.board)
+        return
 
-        var gnsNM: GameNode.GameNodeScore<game.Game>
+        // ========= NegaScout ===========
+        var gnsNS: GameNode.GameNodeScore<Game.Game>
+        var nsTime = time(() => {
+            gnsNS = NegaScout(gameNode, 10, -Infinity, Infinity, 1)
+        })
+
+        console.log('NegaScout score: ' + gnsNS.score + ', board (' + nsTime + 'ms):')
+
+        gnsNS.endNode.originalNode.history().forEach((n) => {
+            printBoard(n.board)
+            console.log();
+        })
+
+        // ========= NegaMax ===========
+        var gnsNM: GameNode.GameNodeScore<Game.Game>
         var nmTime = time(() => {
-            gnsNM = negamax(gameNode, 10, -Infinity, Infinity, 1)
+            gnsNM = NegaMax(gameNode, 10, -Infinity, Infinity, 1)
         })
 
         
@@ -48,11 +61,5 @@ describe('Benchmark',function() {
             printBoard(n.board)
             console.log();
         })
-        //printBoard(gnsNM.node.originalNode.board)
-
-        //expect(nsTime).to.be.lessThan(nmTime)
-        //var move = gns.node.originalNode.move;
-        //var value = gns.node.value()
-        //var playerValue = gns.node.originalNode.playerValue(0)
     })
 })

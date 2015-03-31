@@ -18,12 +18,57 @@ export class PlayerCard {
 
 type Board = PlayerCard[]
 
+var emptyBoard = [
+    null, null, null,
+    null, null, null,
+    null, null, null
+]
+
+export function newBoard() {
+    return emptyBoard.slice()
+}
+
+type Hand = number[]
+type Deck = number[]
+
+export function getRandomHand(deck: Deck) {
+    var hand: Hand = []
+
+    for (var i = 0; i < 5; i++) {
+        var r = (Math.random() * deck.length) | 0
+        var cardId = deck[r]
+        hand.push(cardId)
+        deck = legalDeckFilter(hand, deck)
+    }
+
+    return hand
+}
+
+function legalDeckFilter(hand: number[], deck: number[]) {
+    var handDict = {}
+    var maxRarity = 0
+    var handLen = hand.length
+    for (var i = 0; i < handLen; i++) {
+        var handId = hand[i]
+        if (handId) {
+            var card = cardList[handId]
+            maxRarity = Math.max(maxRarity, card.rarity)
+            handDict[handId] = null
+        }
+    }
+
+    var hasRareCard = maxRarity >= 4
+    return deck.filter(deckId =>
+        !(deckId in handDict)
+        && (hasRareCard && cardList[deckId].rarity < 4))
+}
+
 export class Player {
     hand: number[]
     deck: number[]
     constructor(hand: number[], deck: number[]) {
         this.hand = hand.slice()
-        this.deck = deck.slice()
+        this.deck = legalDeckFilter(hand, deck)
     }
     clone() {
         return new Player(this.hand, this.deck)
@@ -43,7 +88,8 @@ export enum RuleSet {
     Rnd,
     Ord,
     Cha,
-    // Swp, // Don't need to worry about this since it happens at game start
+    SD,
+    Swp, // Don't need to worry about this since it happens at game start
 }
 
 export enum RuleSetFlags {
@@ -60,7 +106,8 @@ export enum RuleSetFlags {
     Rnd = 1 << RuleSet.Rnd,
     Ord = 1 << RuleSet.Ord,
     Cha = 1 << RuleSet.Cha,
-    // Swp, // Don't need to worry about this since it happens at game start
+    SD  = 1 << RuleSet.SD,
+    Swp = 1 << RuleSet.Swp, // Don't need to worry about this since it happens at game start
 }
 
 type BoardCaptures = NDictionary<RuleSetFlags, number[][]>
@@ -75,6 +122,7 @@ export class Game implements Nodes.GameNode<Game> {
     move: {
         boardIndex: number
         handIndex: number
+        deckIndex: number
         player: number
         card: Card
         captures: BoardCaptures
@@ -108,13 +156,15 @@ export class Game implements Nodes.GameNode<Game> {
         }
         // This always scores the value for the first player
         var val = 0;
-        var playerId = this.getPlayerId()
+        //var playerId = this.getPlayerId()
         this.board.forEach((card) => {
             if (card) {
                 if (card.player === 0) val++
                 else val--
             }
         })
+
+        val -= (this.firstMove-1)
 
         this._value = val
         return val
@@ -253,6 +303,7 @@ export class Game implements Nodes.GameNode<Game> {
         node.move = {
             boardIndex: boardIndex,
             handIndex: handIndex,
+            deckIndex: deckIndex,
             player: playerId,
             card: card,
             captures: {},
