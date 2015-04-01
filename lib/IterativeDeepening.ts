@@ -19,7 +19,7 @@ function IterativeDeepening<T extends GameNode.GameNode<any>>(
     }
 
     var start = +new Date()
-    for (var depth = 1; depth < maxDepth; depth++) {
+    for (var depth = 1; depth <= maxDepth; depth++) {
         var nextBest = search(node, depth, -Infinity, Infinity, color, time, start, ttable)
 
         // nextBest.node is null if it timed out
