@@ -21,7 +21,7 @@ describe('Negamax', () => {
             expect(move.player).to.be(0)
             expect(move.card.number).to.be(10)
             expect(playerValue).to.be(5)
-            expect(gns.score).to.be(1)
+            expect(gns.score).to.be(0)
         });
 
         it("should pick card 12 in boardIndex 0",() => {
@@ -37,7 +37,7 @@ describe('Negamax', () => {
             expect(move.player).to.be(0)
             expect(move.card.number).to.be(12)
             expect(playerValue).to.be(6)
-            expect(gns.score).to.be(3)
+            expect(gns.score).to.be(2)
         });
 
         it("should pick card 12 in boardIndex 1",() => {
@@ -52,8 +52,8 @@ describe('Negamax', () => {
             expect(move.card.number).to.be(12)
             expect(move.handIndex).to.be(gameNode.players[0].hand.indexOf(12))
             expect(move.player).to.be(0)
-            expect(value).to.be(1)
-            expect(gns.score).to.be(3)
+            expect(value).to.be(0)
+            expect(gns.score).to.be(2)
             expect(playerValue).to.be(4)
         })
 
@@ -69,9 +69,9 @@ describe('Negamax', () => {
             expect(move.handIndex).to.be(1)
             expect(move.player).to.be(0)
             expect(move.card.number).to.be(12)
-            expect(value).to.be(0)
-            expect(gns.score).to.be(-1)
-            expect(playerValue).to.be(4)
+            expect(value).to.be(1)
+            expect(gns.score).to.be(0)
+            expect(playerValue).to.be(5)
         })
     })
 

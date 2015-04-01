@@ -49,7 +49,6 @@ function PlayGame(
     var games = [p1Game, p2Game]
     var AI = [player1AI, player2AI]
     var times = [player1Time, player2Time]
-    var breakCondition = node => node.isTerminal()
 
     for (var i = 0; i < 9; i++) {
         var turn = (i + moveOffset) % 2
@@ -59,7 +58,7 @@ function PlayGame(
         var color = moveOffset === turn ? 1 : -1
 
         var start = +new Date()
-        var next = IterativeDeepening(node, AI[turn], 9, color, times[turn])
+        var next = IterativeDeepening(node, AI[turn], 9, color, times[turn], null, node => node.isTerminal())
         var end = +new Date()
         var elapsed = (end - start)
         var turnReached = next.endNode.originalNode.turn
@@ -73,7 +72,7 @@ function PlayGame(
 
         console.log()
         console.log()
-        console.log('Turn: ' + i)
+        console.log('Turn: ' + (i+1))
         console.log('Score for player1: ' + games[turn].value())
         console.log('Expected score: ' + (color * next.score))
         console.log('Time elapsed: ' + elapsed + 'ms')
