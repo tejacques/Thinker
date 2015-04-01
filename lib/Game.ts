@@ -181,6 +181,10 @@ export class Game implements Nodes.GameNode<Game> {
             }
         })
 
+        if (this.firstMove !== playerId) {
+            val++
+        }
+
         return val
     }
     isTerminal() {
@@ -426,8 +430,8 @@ function getCaptures(
     var boardIndexes: number[][] = []
 
     if (y > 0) boardIndexes.push([upIndex, 0])
-    if (x < 3) boardIndexes.push([rightIndex, 1])
-    if (y < 3) boardIndexes.push([downIndex, 2])
+    if (x < 2) boardIndexes.push([rightIndex, 1])
+    if (y < 2) boardIndexes.push([downIndex, 2])
     if (x > 0) boardIndexes.push([leftIndex, 3])
 
     // filter to only the valid board positions
