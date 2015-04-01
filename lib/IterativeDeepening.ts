@@ -7,7 +7,8 @@ function IterativeDeepening<T extends GameNode.GameNode<any>>(
     maxDepth: number,
     color: number,
     time?: number,
-    ttable?: TT.TranspositionTable<GameNode.GameNode<T>>
+    ttable?: TT.TranspositionTable<GameNode.GameNode<T>>,
+    breakCondition?: (node: GameNode.GameNode<T>) => boolean
     ) {
     'use strict'
 
@@ -25,6 +26,10 @@ function IterativeDeepening<T extends GameNode.GameNode<any>>(
         if (nextBest.node) {
             best = nextBest
         } else {
+            break
+        }
+
+        if (breakCondition && breakCondition(best.endNode)) {
             break
         }
     }

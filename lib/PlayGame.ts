@@ -49,6 +49,7 @@ function PlayGame(
     var games = [p1Game, p2Game]
     var AI = [player1AI, player2AI]
     var times = [player1Time, player2Time]
+    var breakCondition = node => node.isTerminal()
 
     for (var i = 0; i < 9; i++) {
         var turn = (i + moveOffset) % 2
@@ -57,7 +58,12 @@ function PlayGame(
         var other = games[otherTurn]
         var color = moveOffset === turn ? 1 : -1
 
+        var start = +new Date()
         var next = IterativeDeepening(node, AI[turn], 9, color, times[turn])
+        var end = +new Date()
+        var elapsed = (end - start)
+        var turnReached = next.endNode.originalNode.turn
+        var depthSearched = turnReached - node.turn
         var newNode = next.node.originalNode
         var move = newNode.move
         var cardId = games[turn].players[turn].hand[move.handIndex]
@@ -66,7 +72,13 @@ function PlayGame(
         games[otherTurn] = other.playCard(move.handIndex, deckIndex, move.boardIndex)
 
         console.log()
+        console.log()
+        console.log('Turn: ' + i)
         console.log('Score for player1: ' + games[turn].value())
+        console.log('Expected score: ' + (color * next.score))
+        console.log('Time elapsed: ' + elapsed + 'ms')
+        console.log('Depth searched: ' + depthSearched)
+        console.log('Turn searched to: ' + turnReached)
         PrintBoard(games[turn].board)
     }
 

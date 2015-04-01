@@ -14,10 +14,10 @@ describe("Play Game",function() {
             var gamePlayer = GamePlayers[0]
             var player2 = new Game.Player(gamePlayer.deck, gamePlayer.deck)
             var rules = 0
-            //gamePlayer.rules.forEach(rule => rules+=rule)
+            gamePlayer.rules.forEach(rule => rules+=rule)
             var firstMove = true
             var player1DeckKnown = true
-            var player2DeckKnown = false
+            var player2DeckKnown = true
 
             var nodes = PlayGame(
                 starterDeck,
@@ -30,8 +30,8 @@ describe("Play Game",function() {
                 player2DeckKnown,
                 NegaMax,
                 NegaMax,
-                100,
-                5000)
+                500,
+                500)
             var p1node = nodes[0]
             var p2node = nodes[1]
         })
@@ -54,8 +54,8 @@ describe("Play Game",function() {
                 player2DeckKnown,
                 NegaMax,
                 NegaMax,
-                100,
-                60000)
+                500,
+                500)
             var p1node = nodes[0]
             var p2node = nodes[1]
         })
