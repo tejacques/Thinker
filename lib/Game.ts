@@ -293,7 +293,7 @@ export class Game implements Nodes.GameNode<Game> {
                 }
             }
             if (handId === 0) {
-                player.deck = player.deck.splice(deckIndex, 1)
+                player.deck.splice(deckIndex, 1)
             }
         }
         // Place the card on the board
