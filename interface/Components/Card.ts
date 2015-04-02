@@ -1,10 +1,10 @@
 ﻿import GameCard = require('../../lib/GameCard')
 import React = require('react')
 
-var assetsBase = '/assets/'
+var assetsBase = 'assets/'
 var imageBase = assetsBase + 'img/'
 var imageExtension = '.png'
-var cardBgImg = '/assets/img/bg.png'
+var cardBgImg = imageBase +'bg.png'
 
 enum ImageType {
     Background,
