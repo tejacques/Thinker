@@ -30,8 +30,8 @@ describe("Play Game",function() {
                 player2DeckKnown,
                 NegaMax,
                 NegaMax,
-                0,
-                0)
+                5000,
+                5000)
             var p1node = nodes[0]
             var p2node = nodes[1]
         })
@@ -54,8 +54,8 @@ describe("Play Game",function() {
                 player2DeckKnown,
                 NegaMax,
                 NegaMax,
-                0,
-                0)
+                5000,
+                5000)
             var p1node = nodes[0]
             var p2node = nodes[1]
         })

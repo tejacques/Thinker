@@ -44,7 +44,40 @@ export function getRandomHand(deck: Deck) {
     return hand
 }
 
-function legalDeckFilter(hand: number[], deck: number[]) {
+export function legalDeckFilter(hand: number[], deck: number[]) {
+    var handDict = {}
+    var maxCardId = 0
+    var handLen = hand.length
+    var i: number
+    for (i = 0; i < handLen; i++) {
+        var handId = hand[i]
+        if (handId) {
+            maxCardId = Math.max(maxCardId, handId)
+            handDict[handId] = 1
+        }
+    }
+
+    // CardId 51+ have rarity 4
+    var hasRareCard = maxCardId > 50
+
+
+    var deckLen = deck.length
+    //var newDeck: number[] = []
+    var newDeck: number[] = Array(deckLen)
+    for (i = 0; i < deckLen; i++) {
+        var deckId = deck[i];
+        if (!(deckId in handDict)) {
+            if (!hasRareCard || deckId <= 50) {
+                //newDeck.push(deckId)
+                newDeck[i] = deckId
+            }
+        }
+    }
+
+    return newDeck
+}
+
+export function legalDeckFilterOld(hand: number[], deck: number[]) {
     var handDict = {}
     var maxRarity = 0
     var handLen = hand.length

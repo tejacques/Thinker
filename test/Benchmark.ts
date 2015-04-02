@@ -8,58 +8,44 @@ import NegaScout = require('../lib/NegaScout')
 import IterativeDeepening = require('../lib/IterativeDeepening')
 import TT = require('../lib/TranspositionTable')
 import printBoard = require('../lib/PrintBoard')
+import range = require('../lib/Range')
 
-function time(fn) {
-    var start = +new Date()
+function time(name: string, fn: () => any) {
+    console.time(name)
     fn()
-    var end = +new Date()
-
-    return end - start
+    console.timeEnd(name)
 }
 
-describe('Benchmark',function() {
-    this.timeout(0)
+function repeat(fn: () => any, times: number) {
+    for (var i = 0; i < 100; i++) {
+        fn()
+    }
+}
 
-    it('should take less time to run NegaScout than NegaMax',() => {
-        var gameNode = testVars.TestGame[5]
-        var ttable = new TT.TranspositionTable(50000)
+var testHand = testVars.TestPlayer1[0].hand
+//testHand[4] = 70
+var testDeck = range(80)
 
-        var gns: GameNode.GameNodeScore<Game.Game>
-        var gnsTime = time(() => {
-            gns = IterativeDeepening(gameNode, NegaMax, 10, 0)
-        })
+var warmupTimes = 100000
+var times = 500000
 
-        console.log('Score: ' + gns.score + ', board (' + gnsTime + 'ms):')
+var filteredDeck: number[]
+for (var i = 0; i < warmupTimes; i++) {
+    filteredDeck = Game.legalDeckFilterOld(testHand, testDeck)
+}
+for (var i = 0; i < warmupTimes; i++) {
+    filteredDeck = Game.legalDeckFilter(testHand, testDeck)
+}
 
-        return
+var filteredDeck: number[]
+console.time('old')
+for (var i = 0; i < times; i++) {
+    filteredDeck = Game.legalDeckFilterOld(testHand, testDeck)
+}
+console.timeEnd('old')
 
-        // ========= NegaScout ===========
-        var gnsNS: GameNode.GameNodeScore<Game.Game>
-        var nsTime = time(() => {
-            gnsNS = NegaScout(gameNode, 10, -Infinity, Infinity, 1)
-        })
-
-        console.log('NegaScout score: ' + gnsNS.score + ', board (' + nsTime + 'ms):')
-
-        gnsNS.endNode.originalNode.history().forEach((n) => {
-            printBoard(n.board)
-            console.log();
-        })
-
-        // ========= NegaMax ===========
-        var gnsNM: GameNode.GameNodeScore<Game.Game>
-        var nmTime = time(() => {
-            gnsNM = NegaMax(gameNode, 10, -Infinity, Infinity, 1)
-        })
-
-        
-        console.log();
-        console.log();
-        console.log('NegaMax score: ' + gnsNM.score + ', board (' + nmTime + 'ms):')
-
-        gnsNM.endNode.originalNode.history().forEach((n) => {
-            printBoard(n.board)
-            console.log();
-        })
-    })
-})
+console.time('new')
+for (var i = 0; i < times; i++) {
+    filteredDeck = Game.legalDeckFilter(testHand, testDeck)
+}
+console.timeEnd('new')
