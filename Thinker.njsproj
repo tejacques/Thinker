@@ -21,6 +21,8 @@
   <ItemGroup>
     <Content Include="index.html" />
     <Content Include="package.json" />
+    <TypeScriptCompile Include="interface\App.ts" />
+    <TypeScriptCompile Include="interface\Components\Card.ts" />
     <TypeScriptCompile Include="lib\ArrayUtils.ts" />
     <TypeScriptCompile Include="lib\GameCard.ts" />
     <TypeScriptCompile Include="lib\Game.ts" />
@@ -155,6 +157,7 @@
       <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="typings\react\react.d.ts" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="assets" />
@@ -163,13 +166,17 @@
     <Folder Include="assets\img\number" />
     <Folder Include="assets\img\stars" />
     <Folder Include="assets\img\type" />
+    <Folder Include="interface\Components\" />
     <Folder Include="lib" />
+    <Folder Include="interface\" />
+    <Folder Include="dist\" />
     <Folder Include="typings\mocha\" />
     <Folder Include="typings\expect.js\" />
     <Folder Include="test\" />
     <Folder Include="typings\" />
     <Folder Include="typings\chalk\" />
     <Folder Include="typings\lru-cache\" />
+    <Folder Include="typings\react\" />
     <Folder Include="typings\node\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
