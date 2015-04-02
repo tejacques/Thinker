@@ -1,10 +1,6 @@
 ﻿import GameCard = require('../../lib/GameCard')
 import React = require('react')
 
-function cardStyle(card: GameCard.Card): string {
-    return ""
-}
-
 var assetsBase = '/assets/'
 var imageBase = assetsBase + 'img/'
 var imageExtension = '.png'
@@ -85,7 +81,6 @@ var sideLeftStyle: React.CSSProperties = {
 }
 
 class Card extends React.Component<GameCard.Card, void> {
-    cardImg: string
     render() {
         return React.DOM.span({
             style: cardContainerStyle

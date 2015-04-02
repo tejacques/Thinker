@@ -4,6 +4,7 @@
   "description": "Thinks about something",
   "main": "index.js",
   "scripts": {
+    "build": "browserify interface/App.js | uglifyjs --compress > dist/App.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,11 +18,13 @@
   "homepage": "https://github.com/tejacques/Thinker",
   "private": true,
   "dependencies": {
+    "browserify": "^9.0.4",
     "chalk": "^1.0.0",
     "expect.js": "^0.3.1",
     "lru-cache": "^2.5.0",
     "mocha": "^2.2.1",
     "react": "^0.13.1",
-    "typescript": "^1.4.1"
+    "typescript": "^1.4.1",
+    "uglify-js": "^2.4.19"
   }
 }
