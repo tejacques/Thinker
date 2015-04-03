@@ -34,7 +34,6 @@ function pad(num: number, separator: string, s) {
         padding = ''
     }
     var res = padding + str
-    console.log(res)
     return res
 }
 
@@ -63,6 +62,13 @@ function sideImgSrc(card: GameCard.Card, side: number): string {
     return imageBase
         + imagePath[ImageType.Number]
         + card.sides[side]
+        + imageExtension
+}
+
+function typeImgSrc(card: GameCard.Card): string {
+    return imageBase
+        + imagePath[ImageType.Type]
+        + card.type
         + imageExtension
 }
 
@@ -110,61 +116,86 @@ var sideLeftStyle: React.CSSProperties = {
     bottom: 19,
 }
 
-class Card extends React.Component<Game.PlayerCard, void> {
+var cardTypeStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: 3,
+    right: 3,
+}
+
+interface CardProps {
+    playerCard: Game.PlayerCard
+}
+
+class Card extends React.Component<CardProps, void> {
     render() {
-        var noCard = (this.props.card === null
-            || (this.props.card & 0x7F) === 0x7F)
+        var playerCard = this.props.playerCard
+        var noCard = (playerCard.card === null
+            || (typeof playerCard.card === 'undefined')
+            || (playerCard.card & 0x7F) === 0x7F)
 
         if (noCard) {
             return null
         }
 
-        var faceDown = (this.props.card === 0)
+        var noPlayer = (null === playerCard.player)
+            || (typeof playerCard.player === 'undefined')
 
-        if (faceDown) {
-            return React.DOM.span({
-                style: cardContainerStyle
-            }, React.DOM.img({
-                    src: faceDownImg,
-                    style: cardImgStyle
+        var card = GameCard.cardList[playerCard.card]
+        var cardParts: React.ReactElement<any>[] = []
+
+        // Background
+        if (card.number > 0) {
+            cardParts.push(React.DOM.img({
+                src: noPlayer
+                    ? cardBgImg
+                    : cardBgSrc(playerCard),
+                style: cardImgStyle,
             }))
         }
 
-        var card = GameCard.cardList[this.props.card]
+        // Face
+        cardParts.push(React.DOM.img({
+            src: cardImgSrc(card),
+            style: cardImgStyle,
+        }))
+
+        if (card.number > 0) {
+            // Stars
+            cardParts.push(React.DOM.img({
+                src: starsImgSrc(card),
+                style: starsStyle,
+            }))
+
+            // Sides
+            cardParts.push(React.DOM.img({
+                src: sideImgSrc(card, 0),
+                style: sideTopStyle,
+            }))
+            cardParts.push(React.DOM.img({
+                src: sideImgSrc(card, 1),
+                style: sideRightStyle,
+            }))
+            cardParts.push(React.DOM.img({
+                src: sideImgSrc(card, 2),
+                style: sideBottomStyle,
+            }))
+            cardParts.push(React.DOM.img({
+                src: sideImgSrc(card, 3),
+                style: sideLeftStyle,
+            }))
+
+            // Type
+            if (card.type > 0) {
+                cardParts.push(React.DOM.img({
+                    src: typeImgSrc(card),
+                    style: cardTypeStyle,
+                }))
+            }
+        }
 
         return React.DOM.span({
             style: cardContainerStyle
-        },
-        [
-            React.DOM.img({
-                src: cardBgSrc(this.props),
-                style: cardImgStyle,
-            }),
-            React.DOM.img({
-                src: cardImgSrc(card),
-                style: cardImgStyle,
-            }),
-            React.DOM.img({
-                src: starsImgSrc(card),
-                style: starsStyle,
-            }),
-            React.DOM.img({
-                src: sideImgSrc(card, 0),
-                style: sideTopStyle,
-            }),
-            React.DOM.img({
-                src: sideImgSrc(card, 1),
-                style: sideRightStyle,
-            }),
-            React.DOM.img({
-                src: sideImgSrc(card, 2),
-                style: sideBottomStyle,
-            }),
-            React.DOM.img({
-                src: sideImgSrc(card, 3),
-                style: sideLeftStyle,
-            }),
-        ])
+        }, cardParts)
     }
 }
 
