@@ -77,7 +77,6 @@ var cardContainerStyle: React.CSSProperties = {
     position: 'relative',
     height: 128,
     width: 104,
-    zIndex: -1,
 }
 
 var cardImgStyle: React.CSSProperties = {
