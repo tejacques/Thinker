@@ -6,7 +6,7 @@
     <ProjectGuid>{51b7c7fc-da8e-44fc-9d64-45632e44c16f}</ProjectGuid>
     <ProjectHome />
     <ProjectView>ProjectFiles</ProjectView>
-    <StartupFile>test\Benchmark.ts</StartupFile>
+    <StartupFile>lib\App.ts</StartupFile>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
@@ -23,6 +23,7 @@
     <Content Include="package.json" />
     <TypeScriptCompile Include="interface\App.ts" />
     <TypeScriptCompile Include="interface\Components\Card.ts" />
+    <TypeScriptCompile Include="lib\App.ts" />
     <TypeScriptCompile Include="lib\ArrayUtils.ts" />
     <TypeScriptCompile Include="lib\GameCard.ts" />
     <TypeScriptCompile Include="lib\Game.ts" />
@@ -150,6 +151,7 @@
     <TypeScriptCompile Include="test\TestVars.ts" />
     <TypeScriptCompile Include="typings\chalk\chalk.d.ts" />
     <TypeScriptCompile Include="typings\expect.js\expect.js.d.ts" />
+    <TypeScriptCompile Include="typings\express\express.d.ts" />
     <TypeScriptCompile Include="typings\lru-cache\lru-cache.d.ts" />
     <TypeScriptCompile Include="typings\mocha\mocha.d.ts" />
     <TypeScriptCompile Include="typings\node\node.d.ts" />
@@ -158,6 +160,7 @@
       <TestFramework>Mocha</TestFramework>
     </TypeScriptCompile>
     <TypeScriptCompile Include="typings\react\react.d.ts" />
+    <TypeScriptCompile Include="typings\serve-static\serve-static.ts" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="assets" />
@@ -176,6 +179,8 @@
     <Folder Include="typings\" />
     <Folder Include="typings\chalk\" />
     <Folder Include="typings\lru-cache\" />
+    <Folder Include="typings\express\" />
+    <Folder Include="typings\serve-static\" />
     <Folder Include="typings\react\" />
     <Folder Include="typings\node\" />
   </ItemGroup>

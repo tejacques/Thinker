@@ -21,9 +21,11 @@
     "browserify": "^9.0.4",
     "chalk": "^1.0.0",
     "expect.js": "^0.3.1",
+    "express": "^4.12.3",
     "lru-cache": "^2.5.0",
     "mocha": "^2.2.1",
     "react": "^0.13.1",
+    "serve-static": "^1.9.2",
     "typescript": "^1.4.1",
     "uglify-js": "^2.4.19"
   }
