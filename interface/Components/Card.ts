@@ -1,13 +1,12 @@
 ﻿import Game = require('../../lib/Game')
 import GameCard = require('../../lib/GameCard')
 import React = require('react')
+import Config = require('../Config')
+import Utils = require('../Utils')
 
-var assetsBase = 'assets/'
-var imageBase = assetsBase + 'img/'
-var imageExtension = '.png'
-var cardBgImg = imageBase + 'bg.png'
-var faceDownImg = imageBase + 'face/000.png'
-faceDownImg = cardBgImg
+var imageBase = Config.imageBase
+var imageExtension = Config.imageExtension
+var cardBgImg = Config.cardBgImg
 
 enum ImageType {
     Background,
@@ -24,18 +23,7 @@ imagePath[ImageType.Number] = 'number/'
 imagePath[ImageType.Stars] = 'stars/'
 imagePath[ImageType.Type] = 'type/'
 
-function pad(num: number, separator: string, s) {
-    var str = String(s)
-    num = num-str.length
-    var padding: string
-    if (num > 0) {
-        padding = Array(num + 1).join(separator)
-    } else {
-        padding = ''
-    }
-    var res = padding + str
-    return res
-}
+var pad = Utils.pad
 
 function cardBgSrc(playercard: Game.PlayerCard) {
     return imageBase
@@ -128,7 +116,8 @@ interface CardProps {
 class Card extends React.Component<CardProps, void> {
     render() {
         var playerCard = this.props.playerCard
-        var noCard = (playerCard.card === null
+        var noCard = (!playerCard
+            || (playerCard.card === null)
             || (typeof playerCard.card === 'undefined')
             || (playerCard.card & 0x7F) === 0x7F)
 

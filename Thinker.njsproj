@@ -22,7 +22,11 @@
     <Content Include="index.html" />
     <Content Include="package.json" />
     <TypeScriptCompile Include="interface\App.ts" />
+    <TypeScriptCompile Include="interface\Components\Board.ts" />
     <TypeScriptCompile Include="interface\Components\Card.ts" />
+    <TypeScriptCompile Include="interface\Config.ts" />
+    <TypeScriptCompile Include="interface\ReactUtils.ts" />
+    <TypeScriptCompile Include="interface\Utils.ts" />
     <TypeScriptCompile Include="lib\App.ts" />
     <TypeScriptCompile Include="lib\ArrayUtils.ts" />
     <TypeScriptCompile Include="lib\GameCard.ts" />
