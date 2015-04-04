@@ -89,6 +89,7 @@ process.chdir = function (dir) {
 },{}],2:[function(require,module,exports){
 var React = require('react');
 var Board = require('./Components/Board');
+var Game = require('../lib/Game');
 var GameCard = require('../lib/GameCard');
 var testVars = require('../test/TestVars');
 var cardList = GameCard.cardList;
@@ -99,10 +100,19 @@ var appRoot = document.getElementById('appRoot');
 //    React.DOM.div(null, allPlayer0Cards.map(playerCard => React.createElement(Card, { playerCard: playerCard, key: playerCard.card }))),
 //    React.DOM.div(null, allPlayer1Cards.map(playerCard => React.createElement(Card, { playerCard: playerCard, key: playerCard.card })))
 //])
-var board = React.createElement(Board, { game: testVars.TestGame[6] });
+//new Game.Game(
+//    TestBoard[5],
+//    [TestPlayer1[4], TestPlayer2[4]],
+//    2,
+//    0,
+//    Game.RuleSetFlags.None
+//    )
+var game = testVars.TestGame[6];
+game.board[1] = new Game.PlayerCard(12, 1);
+var board = React.createElement(Board, { game: game });
 React.render(board, appRoot);
 //# sourceMappingURL=App.js.map
-},{"../lib/GameCard":9,"../test/TestVars":166,"./Components/Board":3,"react":165}],3:[function(require,module,exports){
+},{"../lib/Game":8,"../lib/GameCard":9,"../test/TestVars":166,"./Components/Board":3,"react":165}],3:[function(require,module,exports){
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }

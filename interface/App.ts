@@ -17,7 +17,16 @@ var appRoot = document.getElementById('appRoot')
 //    React.DOM.div(null, allPlayer1Cards.map(playerCard => React.createElement(Card, { playerCard: playerCard, key: playerCard.card })))
 //])
 
+//new Game.Game(
+//    TestBoard[5],
+//    [TestPlayer1[4], TestPlayer2[4]],
+//    2,
+//    0,
+//    Game.RuleSetFlags.None
+//    )
 
-var board = React.createElement(Board, { game: testVars.TestGame[6] })
+var game = testVars.TestGame[6]
+
+var board = React.createElement(Board, { game: game })
 
 React.render(board, appRoot)
