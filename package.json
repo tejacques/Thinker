@@ -25,6 +25,7 @@
     "lru-cache": "^2.5.0",
     "mocha": "^2.2.1",
     "react": "^0.13.1",
+    "react-dnd": "^0.9.8",
     "serve-static": "^1.9.2",
     "typescript": "^1.4.1",
     "uglify-js": "^2.4.19"

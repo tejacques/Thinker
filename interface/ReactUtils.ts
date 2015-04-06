@@ -48,7 +48,7 @@ interface CSSProperties extends React.CSSProperties {
     emptyCells?: string
     float?: string
     fontFamily?: string
-    fontSize?: string
+    fontSize?: string | number
     fontStyle?: string
     fontVariant?: string
     fontWeight?: string

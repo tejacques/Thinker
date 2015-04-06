@@ -214,9 +214,11 @@ export class Game implements Nodes.GameNode<Game> {
             }
         })
 
-        if (this.firstMove !== playerId) {
-            val++
-        }
+        this.players[playerId].hand.forEach(card => {
+            if (card !== null) {
+                val++
+            }
+        })
 
         return val
     }
