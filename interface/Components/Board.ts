@@ -5,7 +5,8 @@ import React = require('react')
 import ReactUtils = require('../ReactUtils')
 import Utils = require('../Utils')
 import Config = require('../Config')
-var DragDropMixin = require('react-dnd')
+var ReactDND = require('react-dnd')
+var DragDropMixin = ReactDND.DragDropMixin
 
 var boardImageSrc = Config.imageBase + 'board' + Config.imageExtension
 var pointImageSrcPrefix = Config.imageBase + 'point/'
@@ -58,6 +59,8 @@ function boardStyles(xOffset: number, yOffset: number) {
                 position: 'absolute',
                 top: yOffset + rowOffset * row,
                 left: xOffset + colOffset * col,
+                height: colOffset,
+                width: rowOffset,
             }))
         }
     }
@@ -215,12 +218,19 @@ var DraggableHandItem = React.createClass<HandItemProps, {}>({
                     //   dragEffect?
                     // }
 
-                    beginDrag(component) {
+                    beginDrag(component: React.Component<HandItemProps, any>) {
+                        console.log("Beginning Drag")
                         return {
                             item: {
-                                image: component.props.image
+                                image: component
                             }
                         };
+                    },
+
+                    cagDrag(component: React.Component<HandItemProps, any>) {
+                        var able = component.props.game.getPlayerId() === component.props.player
+                        console.log("Checking canDrag: " + able)
+                        return able
                     }
                 }
             });
@@ -230,20 +240,56 @@ var DraggableHandItem = React.createClass<HandItemProps, {}>({
         // {...this.dragSourceFor(ItemTypes.IMAGE)} will expand into
         // { draggable: true, onDragStart: (handled by mixin), onDragEnd: (handled by mixin) }.
         var dragProps = this.dragSourceFor('HandItem')
-        dragProps.key = 'player' + (this.props.player + 1) + '_card' + (this.props.index + 1)
         return React.DOM.span(dragProps,
             React.createElement(HandItem, this.props))
     }
 })
 
 interface BoardItemProps {
+    game: Game.Game
+    style: React.CSSProperties
+    index: number
 }
 
 var DroppableBoardItem = React.createClass<BoardItemProps, {}>({
-    render: () => null
+    mixins: [DragDropMixin],
+    statics: {
+        configureDragDrop(register) {
+            register('HandItem', {
+                dropTarget: {
+                    acceptDrop(component, item) {
+                        window.alert('You dropped a card!');
+                    }
+                }
+            });
+        }
+    },
+    render() {
+        var style = this.props.style
+        var index = this.props.index
+        var game = this.props.game
+        var playerCard = game.board[index]
+        var dropState = this.getDropState('HandItem')
+        if (dropState.isHovering) {
+            style.backgroundColor = 'darkgreen'
+        } else if (dropState.isDragging) {
+            style.backgroundColor = 'darkkhaki'
+        } else {
+            style.backgroundColor = undefined
+        }
+        return React.DOM.span({ style: style },
+            React.createElement(BoardItem, this.props))
+    }
 })
 
 class BoardItem extends React.Component<BoardItemProps, void> {
+    render() {
+        var game = this.props.game
+        var index = this.props.index
+        return React.createElement(Card, {
+            playerCard: game.board[index]
+        })
+    }
 }
 
 class Board extends React.Component<BoardProps, BoardState> {
@@ -257,7 +303,7 @@ class Board extends React.Component<BoardProps, BoardState> {
         var boardElements: React.ReactElement<any>[] = []
 
         // Board Image
-        boardElements.push(React.DOM.img({ src: boardImageSrc, style: boardImgStyle }))
+        boardElements.push(React.DOM.img({ src: boardImageSrc, style: boardImgStyle, key: 'boardBg' }))
 
         var playerId = game.getPlayerId()
         // Player Cards:
@@ -270,24 +316,22 @@ class Board extends React.Component<BoardProps, BoardState> {
                     index: index,
                     player: player,
                     style: style,
+                    key: 'player' + (player + 1) + '_card' + (index + 1)
                 })
-
-                //React.DOM.span({ style: style, key: 'player'+(player+1)+'_card' +(index+1) },
-                //    React.createElement(Card, {
-                //        playerCard: new Game.PlayerCard(
-                //            game.players[player].hand[index],
-                //            player)
-                //    })
-                //)
             ))
         )
 
 
         // Board Cards
         bStyles.forEach((style, index) =>
-            boardElements.push(React.DOM.span({ style: style, key: 'board_row' + ((index/3) | 0) + '_col' + (index%3) }, React.createElement(Card, {
-                playerCard: game.board[index]
-            })))
+            boardElements.push(
+                React.createElement<BoardItemProps>(DroppableBoardItem, {
+                    game: game,
+                    index: index,
+                    style: style,
+                    key: 'board_row' + ((index / 3) | 0) + '_col' + (index % 3)
+                })
+            )
         )
 
         // Points
@@ -307,6 +351,7 @@ class Board extends React.Component<BoardProps, BoardState> {
                 {
                     active: player === playerId,
                     style: style,
+                    key: 'timer_' + player,
                 }
             ))
         )

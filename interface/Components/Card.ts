@@ -138,6 +138,7 @@ class Card extends React.Component<CardProps, void> {
                     ? cardBgImg
                     : cardBgSrc(playerCard),
                 style: cardImgStyle,
+                key: 'background',
             }))
         }
 
@@ -145,6 +146,7 @@ class Card extends React.Component<CardProps, void> {
         cardParts.push(React.DOM.img({
             src: cardImgSrc(card),
             style: cardImgStyle,
+            key: 'face',
         }))
 
         if (card.number > 0) {
@@ -152,24 +154,29 @@ class Card extends React.Component<CardProps, void> {
             cardParts.push(React.DOM.img({
                 src: starsImgSrc(card),
                 style: starsStyle,
+                key: 'stars',
             }))
 
             // Sides
             cardParts.push(React.DOM.img({
                 src: sideImgSrc(card, 0),
                 style: sideTopStyle,
+                key: 'side_0',
             }))
             cardParts.push(React.DOM.img({
                 src: sideImgSrc(card, 1),
                 style: sideRightStyle,
+                key: 'side_1',
             }))
             cardParts.push(React.DOM.img({
                 src: sideImgSrc(card, 2),
                 style: sideBottomStyle,
+                key: 'side_2',
             }))
             cardParts.push(React.DOM.img({
                 src: sideImgSrc(card, 3),
                 style: sideLeftStyle,
+                key: 'side_3',
             }))
 
             // Type
@@ -177,6 +184,7 @@ class Card extends React.Component<CardProps, void> {
                 cardParts.push(React.DOM.img({
                     src: typeImgSrc(card),
                     style: cardTypeStyle,
+                    key: 'type',
                 }))
             }
         }
