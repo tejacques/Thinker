@@ -141,8 +141,15 @@ class BoardTimer extends React.Component<
         remaining: this.props.active ? 60000 : 0,
         startTime: (+new Date())
     }
+    componentWillReceiveProps(nextProps) {
+        this.setState({
+            time: 60000,
+            remaining: nextProps.active ? 60000 : 0,
+            startTime: (+new Date())
+        })
+    }
     render() {
-        if (this.state.remaining > 0) {
+        if (this.props.active && this.state.remaining > 0) {
             var seconds = Utils.pad(2, '0', Math.max((this.state.remaining / 1000) | 0, 0))
             var rest = Utils.pad(2, '0', Math.max(((this.state.remaining % 1000) / 10) | 0, 0))
             return React.DOM.span(
@@ -154,20 +161,21 @@ class BoardTimer extends React.Component<
                 React.DOM.text(null, '--:--'))
         }
     }
+    interval: any
     componentDidMount() {
-        if (this.props.active) {
-            this.tick()
-        }
+        this.interval = setInterval(() => this.tick(), 33)
+    }
+    componentWillUnmount() {
+        clearInterval(this.interval)
     }
     tick() {
-        if (this.state.remaining > 0) {
+        if (this.props.active && this.state.remaining > 0) {
             var elapsed = (+new Date()) - this.state.startTime
             this.setState({
                 time: this.state.time,
                 remaining: this.state.time - elapsed,
                 startTime: this.state.startTime,
             })
-            setTimeout(() => this.tick(), 33)
         }
     }
 }
@@ -328,7 +336,7 @@ class BoardItem extends React.Component<BoardItemProps, void> {
 class Board extends React.Component<BoardProps, BoardState> {
     state = {
         game: this.props.game,
-        started: false,
+        started: true,
     }
     render() {
         console.log(this)
@@ -339,6 +347,7 @@ class Board extends React.Component<BoardProps, BoardState> {
         boardElements.push(React.DOM.img({ src: boardImageSrc, style: boardImgStyle, key: 'boardBg' }))
 
         var playerId = game.getPlayerId()
+        console.log('Player: ' + playerId)
         // Player Cards:
         // Players Cards for the player whose turn it is
         // are draggable onto the board in an open position
@@ -370,25 +379,28 @@ class Board extends React.Component<BoardProps, BoardState> {
 
         // Points
         var bluePoints = game.playerValue(0)
-        pStyles.forEach((style, index) =>
+        pStyles.forEach((style, index) => {
             boardElements.push(React.DOM.img({
                 style: style,
                 key: 'point_' + index,
                 src: pointImageSrcPrefix + (index < bluePoints ? 0 : 1) + Config.imageExtension
             }))
-        )
+        })
 
         // Timers
-        tStyles.forEach((style, player) =>
+        var timersActive = this.state.started && !this.state.game.isTerminal()
+        tStyles.forEach((style, player) => {
+            var playersTurn = player === playerId
+            console.log('player: ' + player, ' playerId: ' + playerId + ', player === playerId ' + playersTurn)
             boardElements.push(React.createElement(
                 BoardTimer,
                 {
-                    active: player === playerId,
+                    active: timersActive && playersTurn,
                     style: style,
                     key: 'timer_' + player,
                 }
             ))
-        )
+        })
 
         return React.DOM.span({ style: boardStyle }, boardElements)
     }

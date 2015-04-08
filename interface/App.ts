@@ -26,7 +26,6 @@ var appRoot = document.getElementById('appRoot')
 //    )
 
 var game = testVars.TestGame[6]
-window['game'] = game
 
 var board = React.createElement(Board, { game: game })
 

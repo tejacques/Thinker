@@ -19,7 +19,6 @@ var appRoot = document.getElementById('appRoot');
 //    Game.RuleSetFlags.None
 //    )
 var game = testVars.TestGame[6];
-window['game'] = game;
 var board = React.createElement(Board, { game: game });
 React.render(board, appRoot);
 //# sourceMappingURL=App.js.map
@@ -140,8 +139,15 @@ var BoardTimer = (function (_super) {
             startTime: (+new Date())
         };
     }
+    BoardTimer.prototype.componentWillReceiveProps = function (nextProps) {
+        this.setState({
+            time: 60000,
+            remaining: nextProps.active ? 60000 : 0,
+            startTime: (+new Date())
+        });
+    };
     BoardTimer.prototype.render = function () {
-        if (this.state.remaining > 0) {
+        if (this.props.active && this.state.remaining > 0) {
             var seconds = Utils.pad(2, '0', Math.max((this.state.remaining / 1000) | 0, 0));
             var rest = Utils.pad(2, '0', Math.max(((this.state.remaining % 1000) / 10) | 0, 0));
             return React.DOM.span({ style: this.props.style }, React.DOM.text(null, seconds + ':' + rest));
@@ -151,20 +157,20 @@ var BoardTimer = (function (_super) {
         }
     };
     BoardTimer.prototype.componentDidMount = function () {
-        if (this.props.active) {
-            this.tick();
-        }
+        var _this = this;
+        this.interval = setInterval(function () { return _this.tick(); }, 33);
+    };
+    BoardTimer.prototype.componentWillUnmount = function () {
+        clearInterval(this.interval);
     };
     BoardTimer.prototype.tick = function () {
-        var _this = this;
-        if (this.state.remaining > 0) {
+        if (this.props.active && this.state.remaining > 0) {
             var elapsed = (+new Date()) - this.state.startTime;
             this.setState({
                 time: this.state.time,
                 remaining: this.state.time - elapsed,
                 startTime: this.state.startTime,
             });
-            setTimeout(function () { return _this.tick(); }, 33);
         }
     };
     return BoardTimer;
@@ -302,7 +308,7 @@ var Board = (function (_super) {
         _super.apply(this, arguments);
         this.state = {
             game: this.props.game,
-            started: false,
+            started: true,
         };
     }
     Board.prototype.render = function () {
@@ -313,6 +319,7 @@ var Board = (function (_super) {
         // Board Image
         boardElements.push(React.DOM.img({ src: boardImageSrc, style: boardImgStyle, key: 'boardBg' }));
         var playerId = game.getPlayerId();
+        console.log('Player: ' + playerId);
         // Player Cards:
         // Players Cards for the player whose turn it is
         // are draggable onto the board in an open position
@@ -333,17 +340,24 @@ var Board = (function (_super) {
         })); });
         // Points
         var bluePoints = game.playerValue(0);
-        pStyles.forEach(function (style, index) { return boardElements.push(React.DOM.img({
-            style: style,
-            key: 'point_' + index,
-            src: pointImageSrcPrefix + (index < bluePoints ? 0 : 1) + Config.imageExtension
-        })); });
+        pStyles.forEach(function (style, index) {
+            boardElements.push(React.DOM.img({
+                style: style,
+                key: 'point_' + index,
+                src: pointImageSrcPrefix + (index < bluePoints ? 0 : 1) + Config.imageExtension
+            }));
+        });
         // Timers
-        tStyles.forEach(function (style, player) { return boardElements.push(React.createElement(BoardTimer, {
-            active: player === playerId,
-            style: style,
-            key: 'timer_' + player,
-        })); });
+        var timersActive = this.state.started && !this.state.game.isTerminal();
+        tStyles.forEach(function (style, player) {
+            var playersTurn = player === playerId;
+            console.log('player: ' + player, ' playerId: ' + playerId + ', player === playerId ' + playersTurn);
+            boardElements.push(React.createElement(BoardTimer, {
+                active: timersActive && playersTurn,
+                style: style,
+                key: 'timer_' + player,
+            }));
+        });
         return React.DOM.span({ style: boardStyle }, boardElements);
     };
     return Board;
@@ -2529,14 +2543,11 @@ function createDragDropMixin(backend) {
     },
 
     handleDragEnter: function handleDragEnter(types, e) {
-            
-      var anyDropTargetActive = this.isAnyDropTargetActive(types);
-      if (!anyDropTargetActive) {
+      if (!this.isAnyDropTargetActive(types)) {
         return;
       }
-            
-      var monitorEnter = this._monitor.enter(e.target);
-      if (!monitorEnter) {
+
+      if (!this._monitor.enter(e.target)) {
         return;
       }
 
@@ -2568,8 +2579,6 @@ function createDragDropMixin(backend) {
     },
 
     handleDragOver: function handleDragOver(types, e) {
-      var anyDropTargetActive = this.isAnyDropTargetActive(types);
-
       if (!this.isAnyDropTargetActive(types)) {
         return;
       }
