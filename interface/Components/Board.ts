@@ -61,6 +61,9 @@ function boardStyles(xOffset: number, yOffset: number) {
                 left: xOffset + colOffset * col,
                 height: colOffset,
                 width: rowOffset,
+                paddingTop: 4,
+                paddingLeft: 16,
+                boxSizing: 'border-box',
             }))
         }
     }
@@ -94,7 +97,7 @@ var player2HandStyles = handStyles(798, 214)
 
 var playerStyles = [player1HandStyles, player2HandStyles]
 
-var bStyles = boardStyles(385, 77)
+var bStyles = boardStyles(369, 73)
 var pStyles = pointStyles(35, 62)
 
 interface BoardProps {
@@ -103,7 +106,7 @@ interface BoardProps {
 
 interface BoardState {
     game: Game.Game
-    started: boolean
+    started?: boolean
 }
 
 function timerStyles(xOffset: number, yOffset: number) {
@@ -219,17 +222,15 @@ var DraggableHandItem = React.createClass<HandItemProps, {}>({
                     // }
 
                     beginDrag(component: React.Component<HandItemProps, any>) {
-                        console.log("Beginning Drag")
                         return {
                             item: {
-                                image: component
+                                component: component
                             }
                         };
                     },
 
-                    cagDrag(component: React.Component<HandItemProps, any>) {
+                    canDrag(component: React.Component<HandItemProps, any>) {
                         var able = component.props.game.getPlayerId() === component.props.player
-                        console.log("Checking canDrag: " + able)
                         return able
                     }
                 }
@@ -239,6 +240,12 @@ var DraggableHandItem = React.createClass<HandItemProps, {}>({
     render() {
         // {...this.dragSourceFor(ItemTypes.IMAGE)} will expand into
         // { draggable: true, onDragStart: (handled by mixin), onDragEnd: (handled by mixin) }.
+        var dragState = this.getDragState('HandItem')
+
+        if (dragState.isDragging) {
+            return null
+        }
+
         var dragProps = this.dragSourceFor('HandItem')
         return React.DOM.span(dragProps,
             React.createElement(HandItem, this.props))
@@ -246,6 +253,7 @@ var DraggableHandItem = React.createClass<HandItemProps, {}>({
 })
 
 interface BoardItemProps {
+    board: Board
     game: Game.Game
     style: React.CSSProperties
     index: number
@@ -257,11 +265,28 @@ var DroppableBoardItem = React.createClass<BoardItemProps, {}>({
         configureDragDrop(register) {
             register('HandItem', {
                 dropTarget: {
-                    acceptDrop(component, item) {
-                        window.alert('You dropped a card!');
+                    acceptDrop(component: React.Component<BoardItemProps, any>, item: { component: React.Component<HandItemProps, any> }) {
+                        var game = component.props.board.state.game
+                        var boardIndex = component.props.index
+                        var handIndex = item.component.props.index
+                        game = game.playCard(handIndex, 0, boardIndex)
+                        component.props.board.setState({
+                            game: game
+                        })
+                    },
+
+                    canDrop(component: React.Component<BoardItemProps, any>) {
+                        var game = component.props.game
+                        var index = component.props.index
+                        var droppable = !game.board[index]
+
+                        return !game.board[index]
+                    },
+                    enter(component, item) {
+                        // TODO: Preview the move
                     }
                 }
-            });
+            })
         }
     },
     render() {
@@ -270,14 +295,22 @@ var DroppableBoardItem = React.createClass<BoardItemProps, {}>({
         var game = this.props.game
         var playerCard = game.board[index]
         var dropState = this.getDropState('HandItem')
+
         if (dropState.isHovering) {
-            style.backgroundColor = 'darkgreen'
+            style.backgroundColor = 'green'
+            style.opacity = 0.3
         } else if (dropState.isDragging) {
-            style.backgroundColor = 'darkkhaki'
+            style.backgroundColor = 'blue'
+            style.opacity = 0.3
         } else {
             style.backgroundColor = undefined
+            style.opacity = undefined
         }
-        return React.DOM.span({ style: style },
+
+        var props = this.dropTargetFor('HandItem')
+        props.style = style
+
+        return React.DOM.span(props,
             React.createElement(BoardItem, this.props))
     }
 })
@@ -326,6 +359,7 @@ class Board extends React.Component<BoardProps, BoardState> {
         bStyles.forEach((style, index) =>
             boardElements.push(
                 React.createElement<BoardItemProps>(DroppableBoardItem, {
+                    board: this,
                     game: game,
                     index: index,
                     style: style,

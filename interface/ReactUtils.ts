@@ -31,6 +31,7 @@ interface CSSProperties extends React.CSSProperties {
     borderWidth?: string
     border?: string
     bottom?: string
+    boxSizing?: string
     captionSide?: string
     clear?: string
     clip?: string

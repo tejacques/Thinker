@@ -81,6 +81,9 @@ function boardStyles(xOffset, yOffset) {
                 left: xOffset + colOffset * col,
                 height: colOffset,
                 width: rowOffset,
+                paddingTop: 4,
+                paddingLeft: 16,
+                boxSizing: 'border-box',
             }));
         }
     }
@@ -105,7 +108,7 @@ function pointStyles(xOffset, yOffset) {
 var player1HandStyles = handStyles(26, 214);
 var player2HandStyles = handStyles(798, 214);
 var playerStyles = [player1HandStyles, player2HandStyles];
-var bStyles = boardStyles(385, 77);
+var bStyles = boardStyles(369, 73);
 var pStyles = pointStyles(35, 62);
 function timerStyles(xOffset, yOffset) {
     var styles = [];
@@ -203,16 +206,14 @@ var DraggableHandItem = React.createClass({
                     //   dragEffect?
                     // }
                     beginDrag: function (component) {
-                        console.log("Beginning Drag");
                         return {
                             item: {
-                                image: component
+                                component: component
                             }
                         };
                     },
-                    cagDrag: function (component) {
+                    canDrag: function (component) {
                         var able = component.props.game.getPlayerId() === component.props.player;
-                        console.log("Checking canDrag: " + able);
                         return able;
                     }
                 }
@@ -222,6 +223,10 @@ var DraggableHandItem = React.createClass({
     render: function () {
         // {...this.dragSourceFor(ItemTypes.IMAGE)} will expand into
         // { draggable: true, onDragStart: (handled by mixin), onDragEnd: (handled by mixin) }.
+        var dragState = this.getDragState('HandItem');
+        if (dragState.isDragging) {
+            return null;
+        }
         var dragProps = this.dragSourceFor('HandItem');
         return React.DOM.span(dragProps, React.createElement(HandItem, this.props));
     }
@@ -233,7 +238,22 @@ var DroppableBoardItem = React.createClass({
             register('HandItem', {
                 dropTarget: {
                     acceptDrop: function (component, item) {
-                        window.alert('You dropped a card!');
+                        var game = component.props.board.state.game;
+                        var boardIndex = component.props.index;
+                        var handIndex = item.component.props.index;
+                        game = game.playCard(handIndex, 0, boardIndex);
+                        component.props.board.setState({
+                            game: game
+                        });
+                    },
+                    canDrop: function (component) {
+                        var game = component.props.game;
+                        var index = component.props.index;
+                        var droppable = !game.board[index];
+                        return !game.board[index];
+                    },
+                    enter: function (component, item) {
+                        // TODO: Preview the move
                     }
                 }
             });
@@ -246,15 +266,20 @@ var DroppableBoardItem = React.createClass({
         var playerCard = game.board[index];
         var dropState = this.getDropState('HandItem');
         if (dropState.isHovering) {
-            style.backgroundColor = 'darkgreen';
+            style.backgroundColor = 'green';
+            style.opacity = 0.3;
         }
         else if (dropState.isDragging) {
-            style.backgroundColor = 'darkkhaki';
+            style.backgroundColor = 'blue';
+            style.opacity = 0.3;
         }
         else {
             style.backgroundColor = undefined;
+            style.opacity = undefined;
         }
-        return React.DOM.span({ style: style }, React.createElement(BoardItem, this.props));
+        var props = this.dropTargetFor('HandItem');
+        props.style = style;
+        return React.DOM.span(props, React.createElement(BoardItem, this.props));
     }
 });
 var BoardItem = (function (_super) {
@@ -281,6 +306,7 @@ var Board = (function (_super) {
         };
     }
     Board.prototype.render = function () {
+        var _this = this;
         console.log(this);
         var game = this.state.game;
         var boardElements = [];
@@ -299,6 +325,7 @@ var Board = (function (_super) {
         })); }); });
         // Board Cards
         bStyles.forEach(function (style, index) { return boardElements.push(React.createElement(DroppableBoardItem, {
+            board: _this,
             game: game,
             index: index,
             style: style,
@@ -2502,11 +2529,14 @@ function createDragDropMixin(backend) {
     },
 
     handleDragEnter: function handleDragEnter(types, e) {
-      if (!this.isAnyDropTargetActive(types)) {
+            
+      var anyDropTargetActive = this.isAnyDropTargetActive(types);
+      if (!anyDropTargetActive) {
         return;
       }
-
-      if (!this._monitor.enter(e.target)) {
+            
+      var monitorEnter = this._monitor.enter(e.target);
+      if (!monitorEnter) {
         return;
       }
 
@@ -2538,6 +2568,8 @@ function createDragDropMixin(backend) {
     },
 
     handleDragOver: function handleDragOver(types, e) {
+      var anyDropTargetActive = this.isAnyDropTargetActive(types);
+
       if (!this.isAnyDropTargetActive(types)) {
         return;
       }
