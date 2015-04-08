@@ -219,7 +219,7 @@ var DraggableHandItem = React.createClass({
                         };
                     },
                     canDrag: function (component) {
-                        var able = component.props.game.getPlayerId() === component.props.player;
+                        var able = !component.props.game.isTerminal() && component.props.game.getPlayerId() === component.props.player;
                         return able;
                     }
                 }

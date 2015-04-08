@@ -238,7 +238,8 @@ var DraggableHandItem = React.createClass<HandItemProps, {}>({
                     },
 
                     canDrag(component: React.Component<HandItemProps, any>) {
-                        var able = component.props.game.getPlayerId() === component.props.player
+                        var able = !component.props.game.isTerminal()
+                            && component.props.game.getPlayerId() === component.props.player
                         return able
                     }
                 }
