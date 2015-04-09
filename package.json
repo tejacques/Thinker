@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build:prod": "browserify interface/App.js | uglifyjs --compress > dist/App.js",
-    "build": "browserify interface/App.js > dist/App.js",
-    "build:watch": "watch \"npm run build\" interface/ lib/ --wait=0.5",
+    "build": "browserify interface/App.js -d -o dist/App.js",
+    "build:watch": "watchify interface/App.js -d -o dist/App.js -v",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -30,7 +30,6 @@
     "react-dnd": "^0.9.8",
     "serve-static": "^1.9.2",
     "typescript": "^1.4.1",
-    "uglify-js": "^2.4.19",
-    "watch": "^0.16.0"
+    "uglify-js": "^2.4.19"
   }
 }

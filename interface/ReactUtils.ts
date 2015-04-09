@@ -117,5 +117,10 @@ interface CSSProperties extends React.CSSProperties {
 }
 
 export function CSS(css: CSSProperties) {
-    return css;
+    return css
+}
+
+export interface Props extends React.HTMLAttributes {
+    children?: React.ReactNode
+    key?: string | number
 }

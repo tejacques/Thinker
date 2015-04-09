@@ -23,7 +23,10 @@
     <Content Include="package.json" />
     <TypeScriptCompile Include="interface\App.ts" />
     <TypeScriptCompile Include="interface\Components\Board.ts" />
+    <TypeScriptCompile Include="interface\Components\BoardTimer.ts" />
     <TypeScriptCompile Include="interface\Components\Card.ts" />
+    <TypeScriptCompile Include="interface\Components\CardPicker.ts" />
+    <TypeScriptCompile Include="interface\Components\Picker.ts" />
     <TypeScriptCompile Include="interface\Config.ts" />
     <TypeScriptCompile Include="interface\ReactUtils.ts" />
     <TypeScriptCompile Include="interface\Utils.ts" />
