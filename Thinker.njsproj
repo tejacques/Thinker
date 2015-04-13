@@ -30,7 +30,6 @@
     <TypeScriptCompile Include="interface\Config.ts" />
     <TypeScriptCompile Include="interface\ReactUtils.ts" />
     <TypeScriptCompile Include="interface\Utils.ts" />
-    <TypeScriptCompile Include="lib\App.ts" />
     <TypeScriptCompile Include="lib\ArrayUtils.ts" />
     <TypeScriptCompile Include="lib\GameCard.ts" />
     <TypeScriptCompile Include="lib\Game.ts" />
@@ -192,6 +191,7 @@
     <Folder Include="typings\node\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App.js" />
     <Compile Include="dist\App.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
