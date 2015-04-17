@@ -11,8 +11,6 @@ var appRoot = document.getElementById('appRoot')
 var game = testVars.TestGame[6]
 
 var board = React.createElement(Board, { key: 'board', game: game })
-var cardPicker = React.createElement<{}>(
-    CardPicker, { key: 'cardPicker', onPicked: (picked) => { console.log("Picked", picked) } })
-var root = React.DOM.div({}, [board])
+var root = React.DOM.div({}, board)
 
 React.render(root, appRoot) 

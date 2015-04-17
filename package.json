@@ -6,7 +6,7 @@
   "scripts": {
     "build:prod": "browserify interface/App.js | uglifyjs --compress > dist/App.js",
     "build": "browserify interface/App.js -d -o dist/App.js",
-    "build:watch": "watchify typings/*/*.d.ts interface/App.ts -p tsify -d -o dist/App.js -v",
+    "build:watch": "bash scripts/buildwatch.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
