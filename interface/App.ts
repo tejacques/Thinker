@@ -1,9 +1,5 @@
 ﻿import React = require('react')
-import Card = require('./Components/Card')
 import Board = require('./Components/Board')
-import CardPicker = require('./Components/CardPicker')
-import Game = require('../lib/Game')
-import GameCard = require('../lib/GameCard')
 import testVars = require('../test/TestVars')
 
 var appRoot = document.getElementById('appRoot')

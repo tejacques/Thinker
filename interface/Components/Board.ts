@@ -1,11 +1,12 @@
-﻿import BoardTimer = require('./BoardTimer')
+﻿import React = require('react')
+import ReactUtils = require('../ReactUtils')
+import BoardTimer = require('./BoardTimer')
 import Game = require('../../lib/Game')
 import GameCard = require('../../lib/GameCard')
 import Card = require('./Card')
-import React = require('react')
-import ReactUtils = require('../ReactUtils')
-import Utils = require('../Utils')
+import CardPicker = require('./CardPicker')
 import Config = require('../Config')
+import Utils = require('../Utils')
 var ReactDND = require('react-dnd')
 var DragDropMixin = ReactDND.DragDropMixin
 
@@ -295,6 +296,8 @@ class Board extends React.Component<BoardProps, BoardState> {
         game: this.props.game,
         started: true,
     }
+    pickerClick() {
+    }
     render() {
         console.log(this)
         var game = this.state.game
@@ -358,6 +361,10 @@ class Board extends React.Component<BoardProps, BoardState> {
                 }
             ))
         })
+
+        // Picker
+        var cardPicker = React.createElement<{}>(
+            CardPicker, { key: 'cardPicker', onPicked: (picked) => { console.log("Picked", picked) } })
 
         return React.DOM.span({ style: boardStyle }, boardElements)
     }
