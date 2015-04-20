@@ -13,8 +13,7 @@ describe("Play Game",function() {
             var player1 = new Game.Player(starterDeck, starterDeck)
             var gamePlayer = GamePlayers[0]
             var player2 = new Game.Player(gamePlayer.deck, gamePlayer.deck)
-            var rules = 0
-            gamePlayer.rules.forEach(rule => rules+=rule)
+            var rules = gamePlayer.rules
             var firstMove = true
             var player1DeckKnown = true
             var player2DeckKnown = true
@@ -37,8 +36,7 @@ describe("Play Game",function() {
         })
         it("should tie Game Player 0 when playing second",() => {
             var gamePlayer = GamePlayers[0]
-            var rules = 0
-            gamePlayer.rules.forEach(rule => rules += rule)
+            var rules = gamePlayer.rules
             var firstMove = false
             var player1DeckKnown = true
             var player2DeckKnown = true

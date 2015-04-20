@@ -32,20 +32,29 @@ export function newBoard() {
 type Hand = number[]
 type Deck = number[]
 
-export function getRandomHand(deck: Deck) {
+export function getRandomHand(deck: Deck, rarityRestriction: number) {
     var hand: Hand = []
 
     for (var i = 0; i < 5; i++) {
         var r = (Math.random() * deck.length) | 0
         var cardId = deck[r]
         hand.push(cardId)
-        deck = legalDeckFilter(hand, deck)
+        deck = legalDeckFilter(hand, deck, rarityRestriction)
     }
 
     return hand
 }
 
-export function legalDeckFilter(hand: number[], deck: number[]) {
+var rarityIdMap = {
+    2: 20,
+    3: 36,
+    4: 50,
+    5: 60,
+    6: Infinity,
+    'default': Infinity,
+}
+
+export function legalDeckFilter(hand: number[], deck: number[], rarityRestriction) {
     var handDict = {}
     var maxCardId = 0
     var handLen = hand.length
@@ -58,8 +67,8 @@ export function legalDeckFilter(hand: number[], deck: number[]) {
         }
     }
 
-    // CardId 51+ have rarity 4
-    var hasRareCard = maxCardId > 50
+    var rarityThresholdId = rarityIdMap[rarityRestriction] || rarityIdMap.default
+    var hasRareCard = maxCardId > rarityThresholdId
 
 
     var deckLen = deck.length
@@ -67,7 +76,7 @@ export function legalDeckFilter(hand: number[], deck: number[]) {
     for (i = 0; i < deckLen; i++) {
         var deckId = deck[i];
         if (!(deckId in handDict)) {
-            if (!hasRareCard || deckId <= 50) {
+            if (!hasRareCard || deckId <= rarityThresholdId) {
                 newDeck.push(deckId)
             }
         }
@@ -76,34 +85,17 @@ export function legalDeckFilter(hand: number[], deck: number[]) {
     return newDeck
 }
 
-export function legalDeckFilterOld(hand: number[], deck: number[]) {
-    var handDict = {}
-    var maxRarity = 0
-    var handLen = hand.length
-    for (var i = 0; i < handLen; i++) {
-        var handId = hand[i]
-        if (handId) {
-            var card = cardList[handId]
-            maxRarity = Math.max(maxRarity, card.rarity)
-            handDict[handId] = null
-        }
-    }
-
-    var hasRareCard = maxRarity >= 4
-    return deck.filter(deckId =>
-        !(deckId in handDict)
-        && (!hasRareCard || cardList[deckId].rarity < 4))
-}
-
 export class Player {
     hand: number[]
     deck: number[]
-    constructor(hand: number[], deck: number[]) {
+    rarityRestriction: number
+    constructor(hand: number[], deck: number[], rarityRestriction: number = 4) {
         this.hand = hand.slice()
-        this.deck = legalDeckFilter(hand, deck)
+        this.rarityRestriction = rarityRestriction
+        this.deck = legalDeckFilter(hand, deck, this.rarityRestriction)
     }
     clone() {
-        return new Player(this.hand, this.deck)
+        return new Player(this.hand, this.deck, this.rarityRestriction)
     }
 }
 
@@ -122,6 +114,7 @@ export enum RuleSet {
     Cha,
     SD,
     Swp, // Don't need to worry about this since it happens at game start
+    Rou,
 }
 
 export enum RuleSetFlags {
@@ -140,6 +133,7 @@ export enum RuleSetFlags {
     Cha = 1 << RuleSet.Cha,
     SD  = 1 << RuleSet.SD,
     Swp = 1 << RuleSet.Swp, // Don't need to worry about this since it happens at game start
+    Rou = 1 << RuleSet.Rou,
 }
 
 var words = [
@@ -405,24 +399,18 @@ export class Game implements Nodes.GameNode<Game> {
         var cardId = handId || deckId
         var card = cardList[cardId]
 
-        // Remove card from player's hand. A value of null means that card has been played
-        player.hand[handIndex] = null
-
         // Remove card from player's deck, as well as any card that break the rarity rule
         if (player.deck.length) {
-            if (card.rarity > 3) {
-                var lastDeckID = player.deck[player.deck.length - 1]
-                var lastDeckCard = cardList[lastDeckID]
-                if (lastDeckCard.rarity > 3) {
-                    player.deck = player.deck.filter(id => cardList[id].rarity <= 3)
-                }
-            }
             if (handId === 0) {
-                player.deck.splice(deckIndex, 1)
+                player.hand[handIndex] = cardId
             }
+            player.deck = legalDeckFilter(player.hand, player.deck, player.rarityRestriction)
         }
         // Place the card on the board
         var playerCard = node.board[boardIndex] = new PlayerCard(cardId, playerId)
+
+        // Remove card from player's hand. A value of null means that card has been played
+        player.hand[handIndex] = null
 
         // Set the move
         node.move = {

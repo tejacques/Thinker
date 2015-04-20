@@ -298,6 +298,7 @@ interface BoardState {
         open: boolean
         cards?: number[]
     }
+    preview?: Game.Game
 }
 
 class Board extends React.Component<BoardProps, BoardState> {
@@ -308,6 +309,7 @@ class Board extends React.Component<BoardProps, BoardState> {
             open: false,
             cards: [],
         },
+        preview: null
     }
     pickerClick(card: GameCard.Card) {
     }

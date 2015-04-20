@@ -11,7 +11,7 @@ var game = new Game.Game(
     Game.newBoard(),
     [
         new Game.Player(ArrayUtils.fillArray(0, 5), Game.cardIds),
-        new Game.Player(ArrayUtils.fillArray(0, 5), Game.cardIds)
+        new Game.Player(ArrayUtils.fillArray(0, 5), Game.cardIds, 0) // NPC Has no rarity restriction
     ],
     0,
     0,
