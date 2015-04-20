@@ -63,14 +63,12 @@ export function legalDeckFilter(hand: number[], deck: number[]) {
 
 
     var deckLen = deck.length
-    //var newDeck: number[] = []
-    var newDeck: number[] = Array(deckLen)
+    var newDeck: number[] = []
     for (i = 0; i < deckLen; i++) {
         var deckId = deck[i];
         if (!(deckId in handDict)) {
             if (!hasRareCard || deckId <= 50) {
-                //newDeck.push(deckId)
-                newDeck[i] = deckId
+                newDeck.push(deckId)
             }
         }
     }
