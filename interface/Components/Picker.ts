@@ -7,6 +7,7 @@ interface PickerProps<TPicked> {
     style?: React.CSSProperties
     choices: TPicked[]
     onPicked: (picked: TPicked) => void
+    stopPropagation?: boolean
 }
 
 interface PickerState<TPicked> {
@@ -22,7 +23,15 @@ class Picker<TPicked> extends React.Component<PickerProps<TPicked>, PickerState<
             style: this.props.style,
             className: 'pickerContainer',
         }, this.props.choices.map((choice, index) =>
-                React.DOM.li({ key: index, style: { float: 'left' }, onClick: () => this.onPicked(this.props.choices[index]) }, choice)
+                React.DOM.li({
+                    key: index, style: { float: 'left' },
+                    onClick: (e) => {
+                        if (this.props.stopPropagation === true) {
+                            e.stopPropagation()
+                        }
+                        this.onPicked(this.props.choices[index])
+                    },
+                }, choice)
             )
         )
     }

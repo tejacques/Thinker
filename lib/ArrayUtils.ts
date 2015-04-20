@@ -1,4 +1,6 @@
-﻿export function min(arr: number[]) {
+﻿import Range = require('./Range')
+
+export function min(arr: number[]) {
     var len = arr.length
     var min = Infinity
     for (var i = 0; i < len; i++) {
@@ -46,4 +48,13 @@ export function maxProjection<T>(arr: T[], projection: (v: T) => number) {
     }
 
     return arr[maxIndex]
+}
+
+export function fillArray<T>(filler: T, length: number) {
+    var arr: T[] = new Array(length)
+    var i = 0
+    for (; i < length; i++) {
+        arr[i] = filler
+    }
+    return arr;
 }

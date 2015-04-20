@@ -8,45 +8,39 @@ import Range = require('../../lib/Range')
 interface CardPickerProps {
     onPicked: (card: GameCard.Card) => void
     style: React.CSSProperties
+    cards: number[]
+    onClick?: React.MouseEventHandler
 }
 
 interface CardPickerState {
-    open: boolean
 }
 
 import PlayerCard = Game.PlayerCard
 var cardList = GameCard.cardList
-var allCards: React.ReactElement<any>[] = Range(1, 80).map(card => React.createElement(Card, { playerCard: new PlayerCard(card, null) }))
+var allCards: React.ReactElement<any>[] = Range(0, 80).map(card => React.createElement(Card, { playerCard: new PlayerCard(card, null) }))
 
 class CardPicker extends React.Component<CardPickerProps, CardPickerState> {
     state = {
-        open: true,
-        cards: allCards,
-    }
-    display(open) {
-        this.setState({
-            open: open
-        })
-    }
-    show() {
-        this.display(true)
-    }
-    hide() {
-        this.display(false)
+        cards: this.props.cards.map(i => allCards[i]),
     }
     handleChange(event) {
         var input = event.target.value
+        var inputLen = input.length
+        var filteredCards = this.props.cards.filter(cardId =>
+            cardList[cardId].sides.join(" ").substr(0, inputLen) === input)
+
+        this.setState({
+            cards: filteredCards.map(cardId => allCards[cardId])
+        })
     }
     render() {
-        if (!this.state.open) {
-            return null
-        }
-
         return React.DOM.div({
             style: {
                 position: 'relative',
                 background: 'rgba(60,60,60,0.8)',
-            }
+                minHeight: '100vh',
+            },
+            onClick: this.props.onClick,
         },
             React.DOM.div({
                 style: {
@@ -57,19 +51,27 @@ class CardPicker extends React.Component<CardPickerProps, CardPickerState> {
                     overflow: 'auto',
                 },
             }, [
-                    React.DOM.input({
-                        onChange: (e) => this.handleChange(e)
-                    }),
-                    React.createElement(Picker, {
+                React.DOM.input({
+                    key: 'input',
+                    style: {
+                        margin: '30px auto',
+                        display: 'block',
+                        paddingLeft: 5,
+                    },
+                    placeholder: 'Sides',
+                    onChange: (e) => this.handleChange(e),
+                    onClick: (e) => e.stopPropagation(),
+                }),
+                React.createElement(Picker, {
                     key: 'picker',
                     choices: this.state.cards,
                     onPicked: (component: React.ReactElement<{ playerCard: PlayerCard }>) => {
-                        this.setState({ open: false })
                         this.props.onPicked(cardList[component.props.playerCard.card])
                     },
                     style: {
                         listStyleType: 'none',
                     },
+                    stopPropagation: true,
                 })
             ])
         )

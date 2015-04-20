@@ -7,6 +7,8 @@ import Card = require('./Card')
 import CardPicker = require('./CardPicker')
 import Config = require('../Config')
 import Utils = require('../Utils')
+import IterativeDeepening = require('../../lib/IterativeDeepening')
+import NegaMax = require('../../lib/NegaMax')
 var ReactDND = require('react-dnd')
 var DragDropMixin = ReactDND.DragDropMixin
 
@@ -102,15 +104,6 @@ var playerStyles = [player1HandStyles, player2HandStyles]
 var bStyles = boardStyles(369, 73)
 var pStyles = pointStyles(35, 62)
 
-interface BoardProps {
-    game: Game.Game
-}
-
-interface BoardState {
-    game: Game.Game
-    started?: boolean
-}
-
 function timerStyles(xOffset: number, yOffset: number) {
     var styles: React.CSSProperties[] = []
     var playerOffset = 526
@@ -142,6 +135,7 @@ interface HandItemProps {
     index: number
     player: number
     style: React.CSSProperties
+    started: boolean
 }
 
 class HandItem extends React.Component<HandItemProps, void> {
@@ -195,7 +189,8 @@ var DraggableHandItem = React.createClass<HandItemProps, {}>({
                     },
 
                     canDrag(component: React.Component<HandItemProps, any>) {
-                        var able = !component.props.game.isTerminal()
+                        var able = component.props.started
+                            && !component.props.game.isTerminal()
                             && component.props.game.getPlayerId() === component.props.player
                         return able
                     }
@@ -213,6 +208,7 @@ var DraggableHandItem = React.createClass<HandItemProps, {}>({
         }
 
         var dragProps = this.dragSourceFor('HandItem')
+        dragProps.onClick = this.props.onClick
         return React.DOM.span(dragProps,
             React.createElement(HandItem, this.props))
     }
@@ -291,15 +287,51 @@ class BoardItem extends React.Component<BoardItemProps, void> {
     }
 }
 
+interface BoardProps {
+    game: Game.Game
+}
+
+interface BoardState {
+    game?: Game.Game
+    started?: boolean
+    picker?: {
+        open: boolean
+        cards?: number[]
+    }
+}
+
 class Board extends React.Component<BoardProps, BoardState> {
     state = {
         game: this.props.game,
-        started: true,
+        started: false,
+        picker: {
+            open: false,
+            cards: [],
+        },
     }
-    pickerClick() {
+    pickerClick(card: GameCard.Card) {
+    }
+    openPicker(index: number, player: number) {
+        this.pickerClick = card => {
+            var node = this.state.game.clone();
+            node.players[player].hand[index] = card.number
+            node = node.clone() // This is to make the decks update correctly
+            this.setState({
+                game: node,
+                picker: {
+                    open: false
+                },
+            })
+        }
+        var deck = this.state.game.players[player].deck
+        this.setState({
+            picker: {
+                open: true,
+                cards: deck,
+            }
+        })
     }
     render() {
-        console.log(this)
         var game = this.state.game
         var boardElements: React.ReactElement<any>[] = []
 
@@ -307,18 +339,23 @@ class Board extends React.Component<BoardProps, BoardState> {
         boardElements.push(React.DOM.img({ src: boardImageSrc, style: boardImgStyle, key: 'boardBg' }))
 
         var playerId = game.getPlayerId()
-        console.log('Player: ' + playerId)
         // Player Cards:
         // Players Cards for the player whose turn it is
         // are draggable onto the board in an open position
         playerStyles.forEach((playerStyles, player) =>
             playerStyles.forEach((style, index) => boardElements.push(
                 React.createElement<HandItemProps>(DraggableHandItem, {
+                    started: this.state.started,
                     game: game,
                     index: index,
                     player: player,
                     style: style,
-                    key: 'player' + (player + 1) + '_card' + (index + 1)
+                    key: 'player' + (player + 1) + '_card' + (index + 1),
+                    onClick: () => {
+                        if (this.state.game.players[player].deck.length > 0) {
+                            this.openPicker(index, player)
+                        }
+                    },
                 })
             ))
         )
@@ -351,10 +388,8 @@ class Board extends React.Component<BoardProps, BoardState> {
         var timersActive = this.state.started && !this.state.game.isTerminal()
         tStyles.forEach((style, player) => {
             var playersTurn = player === playerId
-            console.log('player: ' + player, ' playerId: ' + playerId + ', player === playerId ' + playersTurn)
             boardElements.push(React.createElement(
-                BoardTimer,
-                {
+                BoardTimer, {
                     active: timersActive && playersTurn,
                     style: style,
                     key: 'timer_' + player,
@@ -362,9 +397,77 @@ class Board extends React.Component<BoardProps, BoardState> {
             ))
         })
 
+        // Rules
+        var ruleSetList = Game.RuleSetFlagsToStrings(this.state.game.rules)
+
+        var rules = React.DOM.span({
+            key: 'rules',
+            style: {
+                position: 'absolute',
+                top: 60,
+                left: 836,
+                width: 256,
+                height: 70,
+                background: 'rgba(60,60,60,0.8)',
+                padding: 10,
+                boxSizing: 'border-box',
+                color: 'white',
+            },
+        }, ruleSetList.map((rule, index) => React.DOM.div({
+            key: 'rule_' + index
+        }, rule)))
+        boardElements.push(rules)
+
+        // Start Button
+        var startButton = React.DOM.button({
+            key: 'start_0',
+            style: {
+                display: 'block',
+                position: 'relative',
+                //margin: '1000px auto'
+            },
+            onClick: () => this.setState({ started: true })
+        }, 'Start')
+        boardElements.push(startButton)
+
+        // AI Play button
+        var aiPlayButton = React.DOM.button({
+            key: 'play_button',
+            style: {
+                display: 'block',
+                position: 'relative',
+                //margin: '1000px auto'
+            },
+            onClick: () => {
+                var color = game.getPlayerId() === 0 ? 1 : -1
+                var time = 5000
+                var next = IterativeDeepening(
+                    this.state.game,
+                    NegaMax,
+                    9,
+                    color,
+                    time,
+                    null,
+                    node => node.isTerminal())
+                this.setState({
+                    game: next.node.originalNode
+                })
+            }
+        }, 'AI Play')
+        boardElements.push(aiPlayButton)
+
         // Picker
-        var cardPicker = React.createElement<{}>(
-            CardPicker, { key: 'cardPicker', onPicked: (picked) => { console.log("Picked", picked) } })
+        if (this.state.picker.open) {
+            var cardPicker = React.createElement<{}>(CardPicker, {
+                key: 'cardPicker',
+                cards: this.state.picker.cards,
+                onPicked: (picked) => this.pickerClick(picked),
+                onClick: () => {
+                    this.setState({ picker: { open: false } })
+                },
+            })
+            boardElements.push(cardPicker)
+        }
 
         return React.DOM.span({ style: boardStyle }, boardElements)
     }

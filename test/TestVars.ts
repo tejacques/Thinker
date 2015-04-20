@@ -96,6 +96,6 @@ export var TestGame = [
         [TestPlayer1[4], TestPlayer2[4]],
         2,
         0,
-        Game.RuleSetFlags.None
+        Game.RuleSetFlags.TO | Game.RuleSetFlags.Plu
         )
 ]

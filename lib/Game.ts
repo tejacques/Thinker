@@ -1,7 +1,8 @@
 ﻿import Nodes = require('./GameNode')
 import GameCard = require('./GameCard')
 import range = require('./Range')
-var cardList = GameCard.cardList
+export var cardList = GameCard.cardList
+export var cardIds = range(1, 80)
 type Card = GameCard.Card
 
 export class PlayerCard {
@@ -18,7 +19,7 @@ export class PlayerCard {
 
 type Board = PlayerCard[]
 
-var emptyBoard = [
+var emptyBoard: Board = [
     null, null, null,
     null, null, null,
     null, null, null
@@ -128,7 +129,7 @@ export enum RuleSet {
 export enum RuleSetFlags {
     None = 0,
     AO = 1 << RuleSet.AO,
-    TO  = 1 << RuleSet.Asc,
+    TO  = 1 << RuleSet.TO,
     Sam = 1 << RuleSet.Sam,
     Plu = 1 << RuleSet.Plu,
     Com = 1 << RuleSet.Sam | 1 << RuleSet.Plu,
@@ -141,6 +142,89 @@ export enum RuleSetFlags {
     Cha = 1 << RuleSet.Cha,
     SD  = 1 << RuleSet.SD,
     Swp = 1 << RuleSet.Swp, // Don't need to worry about this since it happens at game start
+}
+
+var words = [
+    'All',       //  0
+    'Ace',       //  1
+    'Three',     //  2
+    'Open',      //  3
+    'Plus',      //  4
+    'Minus',     //  5
+    'Same',      //  6
+    'Different', //  7
+    'Reverse',   //  8
+    'Forwards',  //  9
+    'Fallen',    // 10
+    'Risen',     // 11
+    'Ascension', // 12
+    'Descension',// 13
+    'Order',     // 14
+    'Chaos',     // 15
+    'Sudden',    // 16
+    'Death',     // 17
+    'Swap',      // 18
+    'Random',    // 19
+]
+
+export function RuleSetFlagsToStrings(ruleSetFlags) {
+    var res: string[] = []
+    var s: string
+
+    if (ruleSetFlags & RuleSetFlags.AO) {
+        s = words[0] + ' ' + words[3]
+        res.push(s)
+    }
+    if (ruleSetFlags & RuleSetFlags.TO) {
+        s = words[2] + ' ' + words[3]
+        res.push(s)
+    }
+    if (ruleSetFlags & RuleSetFlags.Sam) {
+        s = words[6]
+        res.push(s)
+    }
+    if (ruleSetFlags & RuleSetFlags.Plu) {
+        s = words[4]
+        res.push(s)
+    }
+    if (ruleSetFlags & RuleSetFlags.Rev) {
+        s = words[8]
+        res.push(s)
+    }
+    if (ruleSetFlags & RuleSetFlags.FA) {
+        s = words[10] + ' ' + words[1]
+        res.push(s)
+    }
+    if (ruleSetFlags & RuleSetFlags.Asc) {
+        s = words[12]
+        res.push(s)
+    }
+    if (ruleSetFlags & RuleSetFlags.Des) {
+        s = words[13]
+        res.push(s)
+    }
+    if (ruleSetFlags & RuleSetFlags.Rnd) {
+        s = words[19]
+        res.push(s)
+    }
+    if (ruleSetFlags & RuleSetFlags.Ord) {
+        s = words[14]
+        res.push(s)
+    }
+    if (ruleSetFlags & RuleSetFlags.Cha) {
+        s = words[15]
+        res.push(s)
+    }
+    if (ruleSetFlags & RuleSetFlags.SD) {
+        s = words[16] + ' ' + words[17]
+        res.push(s)
+    }
+    if (ruleSetFlags & RuleSetFlags.Swp) {
+        s = words[18]
+        res.push(s)
+    }
+
+    return res
 }
 
 type BoardCaptures = NDictionary<RuleSetFlags, number[][]>
