@@ -411,6 +411,7 @@ class Board extends React.Component<BoardProps, BoardState> {
     render() {
         var game = this.state.game
         var preview = this.state.preview
+        if (preview) { console.log(preview) }
         var boardElements: React.ReactElement<any>[] = []
 
         // Board Image
@@ -541,52 +542,124 @@ class Board extends React.Component<BoardProps, BoardState> {
         })
 
         // Start Button
-        var startButton = React.DOM.button({
-            key: 'start_button',
-            style: {
-                display: 'block',
-                position: 'absolute',
-                top: 560,
-                left: 440,
-                width: 80,
-                height: 40,
-            },
-            onClick: () => this.setState({ started: true })
-        }, 'Start')
-        boardElements.push(startButton)
+        if (!this.state.started) {
+            var startButton = React.DOM.button({
+                key: 'start_button',
+                style: {
+                    display: 'block',
+                    position: 'absolute',
+                    top: 560,
+                    left: 440,
+                    width: 80,
+                    height: 40,
+                },
+                onClick: () => this.setState({ started: true })
+            }, 'Start')
+            boardElements.push(startButton)
 
-        // Restart Button
+            // Toggle First
+            var toggleFirstButtom = React.DOM.button({
+                key: 'blue_first_button',
+                style: {
+                    display: 'block',
+                    position: 'absolute',
+                    top: 560,
+                    left: 530,
+                    width: 80,
+                    height: 40,
+                },
+                onClick: () => {
+                    var node = game.clone()
+                    node.firstMove = (node.firstMove + 1) % node.players.length
+                    this.setState({
+                        game: node
+                    })
+                }
+            }, (game.firstMove === 0 ? 'Blue' : 'Red') + ' First')
+            boardElements.push(toggleFirstButtom)
+            
+        } else {
 
-        // Undo Button
+            // Restart Button
+            var restartButton = React.DOM.button({
+                key: 'restart_button',
+                style: {
+                    display: 'block',
+                    position: 'absolute',
+                    top: 560,
+                    left: 440,
+                    width: 80,
+                    height: 40,
+                },
+                onClick: () => {
+                    var node: Game.Game = this.state.game
+                    while (node.parent) {
+                        node = node.parent
+                    }
+                    this.setState({
+                        game: node,
+                        started: true,
+                    })
+                }
+            }, 'Restart')
+            boardElements.push(restartButton)
 
-        // AI Play button
-        var aiPlayButton = React.DOM.button({
-            key: 'play_button',
-            style: {
-                display: 'block',
-                position: 'absolute',
-                top: 560,
-                left: 530,
-                width: 80,
-                height: 40,
-            },
-            onClick: () => {
-                var color = game.getPlayerId() === 0 ? 1 : -1
-                var time = 5000
-                var next = IterativeDeepening(
-                    this.state.game,
-                    NegaMax,
-                    9,
-                    color,
-                    time,
-                    null,
-                    node => node.isTerminal())
-                this.setState({
-                    game: next.node.originalNode
-                })
+            // AI Play button
+            var aiPlayButton = React.DOM.button({
+                key: 'play_button',
+                style: {
+                    display: 'block',
+                    position: 'absolute',
+                    top: 560,
+                    left: 530,
+                    width: 80,
+                    height: 40,
+                },
+                onClick: () => {
+                    var color = game.getPlayerId() === 0 ? 1 : -1
+                    var time = 5000
+                    var next = IterativeDeepening(
+                        this.state.game,
+                        NegaMax,
+                        9,
+                        color,
+                        time,
+                        null,
+                        node => node.isTerminal())
+                    this.setState({
+                        game: next.node.originalNode
+                    })
+                }
+            }, 'AI Play')
+            boardElements.push(aiPlayButton)
+
+            // Undo Button
+            if (this.state.game.parent) {
+                var restartButton = React.DOM.button({
+                    key: 'undo_button',
+                    style: {
+                        display: 'block',
+                        position: 'absolute',
+                        top: 560,
+                        left: 620,
+                        width: 80,
+                        height: 40,
+                    },
+                    onClick: () => {
+                        var node: Game.Game = this.state.game
+                        if (node.parent) {
+                            node = node.parent
+                            this.setState({
+                                game: node,
+                                started: true,
+                            })
+                        }
+                    }
+                }, 'Undo')
+
+                boardElements.push(restartButton)
             }
-        }, 'AI Play')
-        boardElements.push(aiPlayButton)
+        }
 
         // Picker
         if (this.state.picker.open) {

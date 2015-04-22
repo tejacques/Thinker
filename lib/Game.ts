@@ -572,11 +572,15 @@ function getCaptures(
     })
 
     if (basicCaptures.length) {
-        var ruleSet = node.rules & ~RuleSetFlags.Com
-        capturedIndexes[ruleSet] = basicCaptures
+        if (com) {
+            capturedIndexes[RuleSetFlags.Com] = basicCaptures
+        }
+        else {
+            var ruleSet = node.rules & ~RuleSetFlags.Com
+            capturedIndexes[ruleSet] = basicCaptures
+        }
     }
 
-    var samCaptures = []
     // Rules.Sam
     // Can use own or opponents cards.
     if (!com && (node.rules & RuleSetFlags.Sam)) {
@@ -588,7 +592,7 @@ function getCaptures(
             var otherCard = cardList[sideCard.card]
 
             var sideValue = card.sides[sideIndex];
-            var otherValue = otherCard[getOppositeSide(sideIndex)]
+            var otherValue = otherCard.sides[getOppositeSide(sideIndex)]
 
             return sideValue === otherValue
         }
@@ -606,6 +610,7 @@ function getCaptures(
     // Rules.Plu
     // Can use own or opponents cards.
     if (!com && (node.rules & RuleSetFlags.Plu)) {
+        // Map each adjacent card to it's sum
         var pluMap = indexes => {
             var boardIndex = indexes[0]
             var sideIndex = indexes[1]
@@ -614,14 +619,14 @@ function getCaptures(
             var otherCard = cardList[sideCard.card]
 
             var sideValue = card.sides[sideIndex];
-            var otherValue = otherCard[getOppositeSide(sideIndex)]
+            var otherValue = otherCard.sides[getOppositeSide(sideIndex)]
 
             return sideValue + otherValue
         }
 
         var pluReducer = (
-            accumulator: NDictionary<number, number[]>,
-            value,
+            accumulator: { [key: number]: number[] },
+            value: number,
             index: number) => {
             var accVal = accumulator[value] = accumulator[value] || []
             accVal.push(index)
@@ -630,9 +635,17 @@ function getCaptures(
 
         // Get the sum of each pair
         // Get the list of indexes in validBoardIndexes with that sum
-        var pluSides: NDictionary<number, number[]> = validBoardIndexes
+        var pluMapRes = validBoardIndexes
             .map(pluMap)
-            .reduce(pluReducer, {})
+
+        console.log('pluMapRes: ', pluMapRes)
+
+        var accumulator: { [key: number]: number[] } = {}
+        var pluSides = validBoardIndexes
+            .map(pluMap)
+            .reduce(pluReducer, accumulator)
+
+        console.log('pluSides: ', pluSides)
 
         var pluIndexes: number[] = []
         for (var sum in pluSides) {
