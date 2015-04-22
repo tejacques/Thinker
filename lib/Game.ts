@@ -635,17 +635,10 @@ function getCaptures(
 
         // Get the sum of each pair
         // Get the list of indexes in validBoardIndexes with that sum
-        var pluMapRes = validBoardIndexes
-            .map(pluMap)
-
-        console.log('pluMapRes: ', pluMapRes)
-
         var accumulator: { [key: number]: number[] } = {}
         var pluSides = validBoardIndexes
             .map(pluMap)
             .reduce(pluReducer, accumulator)
-
-        console.log('pluSides: ', pluSides)
 
         var pluIndexes: number[] = []
         for (var sum in pluSides) {
