@@ -3,6 +3,8 @@ import ReactUtils = require('../ReactUtils')
 import BoardTimer = require('./BoardTimer')
 import Game = require('../../lib/Game')
 import GameCard = require('../../lib/GameCard')
+import GamePlayer = require('../../lib/GamePlayer')
+import ArrayUtils = require('../../lib/ArrayUtils')
 import Card = require('./Card')
 import CardPicker = require('./CardPicker')
 import Config = require('../Config')
@@ -217,8 +219,18 @@ var DraggableHandItem = React.createClass<HandItemProps, {}>({
 interface BoardItemProps {
     board: Board
     game: Game.Game
+    preview: Game.Game
     style: React.CSSProperties
     index: number
+}
+
+function getNext(
+    component: React.Component<BoardItemProps, any>,
+    item: { component: React.Component<HandItemProps, any> }) {
+    var game = component.props.board.state.game
+    var boardIndex = component.props.index
+    var handIndex = item.component.props.index
+    return game.playCard(handIndex, 0, boardIndex)
 }
 
 var DroppableBoardItem = React.createClass<BoardItemProps, {}>({
@@ -227,13 +239,13 @@ var DroppableBoardItem = React.createClass<BoardItemProps, {}>({
         configureDragDrop(register) {
             register('HandItem', {
                 dropTarget: {
-                    acceptDrop(component: React.Component<BoardItemProps, any>, item: { component: React.Component<HandItemProps, any> }) {
-                        var game = component.props.board.state.game
-                        var boardIndex = component.props.index
-                        var handIndex = item.component.props.index
-                        game = game.playCard(handIndex, 0, boardIndex)
+                    acceptDrop(
+                        component: React.Component<BoardItemProps, any>,
+                        item: { component: React.Component<HandItemProps, any> }) {
+                        
                         component.props.board.setState({
-                            game: game
+                            game: getNext(component, item),
+                            preview: null,
                         })
                     },
 
@@ -244,8 +256,26 @@ var DroppableBoardItem = React.createClass<BoardItemProps, {}>({
 
                         return !game.board[index]
                     },
-                    enter(component, item) {
-                        // TODO: Preview the move
+                    enter(
+                        component: React.Component<BoardItemProps, any>,
+                        item: { component: React.Component<HandItemProps, any> }) {
+
+                        // This is dumb, but it must be in
+                        // a setTimeout to happen after leave
+                        setTimeout(() => {
+                            // Preview the move
+                            component.props.board.setState({
+                                preview: getNext(component, item),
+                            })
+                        }, 0)
+                    },
+                    leave(
+                        component: React.Component<BoardItemProps, any>,
+                        item: { component: React.Component<HandItemProps, any> }) {
+
+                        component.props.board.setState({
+                            preview: null,
+                        })
                     }
                 }
             })
@@ -253,17 +283,56 @@ var DroppableBoardItem = React.createClass<BoardItemProps, {}>({
     },
     render() {
         var style = this.props.style
-        var index = this.props.index
-        var game = this.props.game
+        var index: number = this.props.index
+        var game: Game.Game = this.props.game
+        var preview: Game.Game = this.props.preview
         var playerCard = game.board[index]
         var dropState = this.getDropState('HandItem')
 
+        var previewColor = null
+        if (preview && preview.move && preview.move.captures) {
+            var captures = preview.move.captures
+            for (var key in captures) {
+                if (captures.hasOwnProperty(key)) {
+                    var captured = captures[key]
+                    var exists = false
+                    var captureLevelLen = captured.length
+                    for (var captureLevelIndex = 0;
+                        captureLevelIndex < captureLevelLen;
+                        captureLevelIndex++) {
+                        var captureLevel = captured[captureLevelIndex]
+                        if (captureLevel.indexOf(index) != -1) {
+                            exists = true
+                            break
+                        }
+                    }
+
+                    if (!exists) {
+                        continue
+                    }
+
+                    if (key === String(Game.RuleSetFlags.Plu)) {
+                        previewColor = 'orange'
+                        break
+                    } else if (key === String(Game.RuleSetFlags.Sam)) {
+                        previewColor = 'rgba(255, 255, 0, 0.3)'
+                        break
+                    } else if (key === String(Game.RuleSetFlags.Com)) {
+                        previewColor = 'rgba(255, 0, 0, 0.3)'
+                        break
+                    } else {
+                        previewColor = 'rgba(0, 255, 0, 0.3)'
+                    }
+                }
+            }
+        }
+
         if (dropState.isHovering) {
-            style.backgroundColor = 'green'
-            style.opacity = 0.3
+            style.backgroundColor = 'rgba(0, 255, 0, 0.3)'
+        } else if (previewColor) {
+            style.backgroundColor = previewColor
         } else if (dropState.isDragging) {
-            style.backgroundColor = 'blue'
-            style.opacity = 0.3
+            style.backgroundColor = 'rgba(0, 0, 255, 0.3)'
         } else {
             style.backgroundColor = undefined
             style.opacity = undefined
@@ -316,8 +385,14 @@ class Board extends React.Component<BoardProps, BoardState> {
     openPicker(index: number, player: number) {
         this.pickerClick = card => {
             var node = this.state.game.clone();
-            node.players[player].hand[index] = card.number
-            node = node.clone() // This is to make the decks update correctly
+            var gamePlayer = node.players[player]
+            var deck = gamePlayer.deck
+            var hand = node.players[player].hand
+            var handId = hand[index]
+            hand[index] = card.number
+            deck.push(handId)
+            ArrayUtils.numericSort(deck, x => x)
+            node.players[player].deck = Game.legalDeckFilter(hand, deck, node.players[player].rarityRestriction)
             this.setState({
                 game: node,
                 picker: {
@@ -325,16 +400,17 @@ class Board extends React.Component<BoardProps, BoardState> {
                 },
             })
         }
-        var deck = this.state.game.players[player].deck
+        var cards = this.state.game.players[player].deck
         this.setState({
             picker: {
                 open: true,
-                cards: deck,
+                cards: cards,
             }
         })
     }
     render() {
         var game = this.state.game
+        var preview = this.state.preview
         var boardElements: React.ReactElement<any>[] = []
 
         // Board Image
@@ -369,6 +445,7 @@ class Board extends React.Component<BoardProps, BoardState> {
                 React.createElement<BoardItemProps>(DroppableBoardItem, {
                     board: this,
                     game: game,
+                    preview: preview,
                     index: index,
                     style: style,
                     key: 'board_row' + ((index / 3) | 0) + '_col' + (index % 3)
@@ -420,25 +497,78 @@ class Board extends React.Component<BoardProps, BoardState> {
         }, rule)))
         boardElements.push(rules)
 
+        // Player Picker (dropdown)
+        game.players.forEach((p, playerId) => {
+            var playerList = React.DOM.select({
+                key: 'playerList_' + playerId,
+                style: {
+                    display: 'block',
+                    position: 'absolute',
+                    top: 185,
+                    left: 80 + playerId * 770,
+                },
+                onChange: e => {
+                    var value = e.target['value']
+                    var node = this.state.game.clone()
+                    var deck: number[]
+                    if (value === 'All') {
+                        deck = Game.cardIds
+                        node.players[playerId].rarityRestriction = 4
+                    } else {
+                        var player: GamePlayer.GamePlayer = GamePlayer.players[parseInt(value)]
+                        deck = player.deck
+                        node.players[playerId].rarityRestriction = 0
+                        if (playerId === 1) {
+                            // Set the rules
+                            node.rules = player.rules
+                        }
+                    }
+                    node.players[playerId].deck = deck
+                    this.setState({
+                        game: node
+                    })
+                }
+            }, [
+                React.DOM.option({
+                    value: 'All',
+                    key: 'All',
+                }, 'Player')].concat(GamePlayer.players.map((player, index) => React.DOM.option({
+                value: String(index),
+                key: player.name,
+            }, player.name))))
+
+            boardElements.push(playerList)
+        })
+
         // Start Button
         var startButton = React.DOM.button({
-            key: 'start_0',
+            key: 'start_button',
             style: {
                 display: 'block',
-                position: 'relative',
-                //margin: '1000px auto'
+                position: 'absolute',
+                top: 560,
+                left: 440,
+                width: 80,
+                height: 40,
             },
             onClick: () => this.setState({ started: true })
         }, 'Start')
         boardElements.push(startButton)
+
+        // Restart Button
+
+        // Undo Button
 
         // AI Play button
         var aiPlayButton = React.DOM.button({
             key: 'play_button',
             style: {
                 display: 'block',
-                position: 'relative',
-                //margin: '1000px auto'
+                position: 'absolute',
+                top: 560,
+                left: 530,
+                width: 80,
+                height: 40,
             },
             onClick: () => {
                 var color = game.getPlayerId() === 0 ? 1 : -1

@@ -58,3 +58,14 @@ export function fillArray<T>(filler: T, length: number) {
     }
     return arr;
 }
+
+export function numericSort<T>(
+    arr: T[],
+    toNumber: (t: T) => number,
+    reverse: boolean = false) {
+    if (!reverse) {
+        return arr.sort((a, b) => toNumber(a) - toNumber(b))
+    } else {
+        return arr.sort((a, b) => toNumber(b) - toNumber(a))
+    }
+}

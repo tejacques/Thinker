@@ -1,6 +1,6 @@
 ﻿import Game = require('./Game')
 
-interface GamePlayer {
+export interface GamePlayer {
     number: number
     name: string
     deck: number[]
@@ -13,7 +13,7 @@ interface GamePlayer {
     rules: number
 }
 
-var players: GamePlayer[] = [
+export var players: GamePlayer[] = [
     {
         number: 0,
         name: 'VHJpcGxlIFRyaWFkIE1hc3Rlcg==',
@@ -412,4 +412,4 @@ var players: GamePlayer[] = [
     }
 ]
 
-export = players
+players.forEach(player => player.name = atob(player.name))

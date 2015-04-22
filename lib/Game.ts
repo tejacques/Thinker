@@ -75,7 +75,7 @@ export function legalDeckFilter(hand: number[], deck: number[], rarityRestrictio
     var newDeck: number[] = []
     for (i = 0; i < deckLen; i++) {
         var deckId = deck[i];
-        if (!(deckId in handDict)) {
+        if (deckId && !(deckId in handDict)) {
             if (!hasRareCard || deckId <= rarityThresholdId) {
                 newDeck.push(deckId)
             }
