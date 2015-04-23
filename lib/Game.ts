@@ -385,7 +385,7 @@ export class Game implements Nodes.GameNode<Game> {
         return iterator
     }
     clone() {
-        return new Game(this.board, this.players, this.turn, this.firstMove, this.rules)
+        return new Game(this.board, this.players, this.turn, this.firstMove, this.rules, this.parent)
     }
     playCard(handIndex: number, deckIndex: number, boardIndex: number): Game {
         var node = this.clone()
@@ -651,7 +651,7 @@ function getCaptures(
 
         if (pluIndexes.length > 1) {
             var pluFilteredSides = pluIndexes
-                .map(index => boardIndexes[index])
+                .map(index => validBoardIndexes[index])
                 .filter(filterOtherPlayer)
             if (pluFilteredSides.length) {
                 capturedIndexes[RuleSetFlags.Plu] = pluFilteredSides.map(s => s[0])

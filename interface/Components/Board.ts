@@ -497,7 +497,7 @@ class Board extends React.Component<BoardProps, BoardState> {
         }, rule)))
         boardElements.push(rules)
 
-        // Player Picker (dropdown)
+        // Player Select (dropdown)
         game.players.forEach((p, playerId) => {
             var playerList = React.DOM.select({
                 key: 'playerList_' + playerId,
@@ -595,9 +595,16 @@ class Board extends React.Component<BoardProps, BoardState> {
                     while (node.parent) {
                         node = node.parent
                     }
+                    node = node.clone()
+                    var player = node.players[1]
+                    player.hand.forEach((cardId, index) => {
+                        player.hand[index] = 0
+                        player.deck.push(cardId)
+                    })
+                    ArrayUtils.numericSort(player.deck, x => x)
                     this.setState({
                         game: node,
-                        started: true,
+                        started: false,
                     })
                 }
             }, 'Restart')
