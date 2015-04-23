@@ -463,7 +463,7 @@ export class Game implements Nodes.GameNode<Game> {
         }
 
         // Capture the positions
-        for (var rule in captures) {
+        for (var rule in node.move.captures) {
             var ruleCaptures = node.move.captures[rule]
             ruleCaptures.forEach(captureLevel => captureLevel.forEach(captureIndex))
         }
