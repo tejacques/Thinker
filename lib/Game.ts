@@ -443,16 +443,18 @@ export class Game implements Nodes.GameNode<Game> {
                     var ruleCaptures = node.move.captures[rule] = node.move.captures[rule] || []
                     ruleCaptures.push(captures[rule])
                 }
-                nextCapturedPositions = []
+                var currentCapturePositions: number[] = []
 
-                nextCapturedPositions.push.apply(nextCapturedPositions, captures[RuleSetFlags.Sam])
-                nextCapturedPositions.push.apply(nextCapturedPositions, captures[RuleSetFlags.Plu])
-                nextCapturedPositions.push.apply(nextCapturedPositions, captures[RuleSetFlags.Com])
+                currentCapturePositions.push.apply(currentCapturePositions, captures[RuleSetFlags.Sam])
+                currentCapturePositions.push.apply(currentCapturePositions, captures[RuleSetFlags.Plu])
+                currentCapturePositions.push.apply(currentCapturePositions, captures[RuleSetFlags.Com])
 
                 com = true
 
                 // Capture the positions
-                nextCapturedPositions.forEach(captureIndex)
+                currentCapturePositions.forEach(captureIndex)
+
+                nextCapturedPositions.push.apply(nextCapturedPositions, currentCapturePositions)
             }
 
             // If com is in effect, keep going!
