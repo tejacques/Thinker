@@ -623,7 +623,7 @@ class Board extends React.Component<BoardProps, BoardState> {
                 },
                 onClick: () => {
                     var color = game.getPlayerId() === 0 ? 1 : -1
-                    var time = 5000
+                    var time = 10000
                     var next = IterativeDeepening(
                         this.state.game,
                         NegaMax,
