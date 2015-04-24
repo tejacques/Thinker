@@ -1,6 +1,6 @@
 ﻿import expect = require('expect.js')
 import Game = require('../lib/Game')
-import GamePlayers = require('../lib/GamePlayers')
+import GamePlayers = require('../lib/GamePlayer')
 import PlayGame = require('../lib/PlayGame')
 import NegaMax = require('../lib/NegaMax')
 import PrintBoard = require('../lib/PrintBoard')

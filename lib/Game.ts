@@ -436,7 +436,8 @@ export class Game implements Nodes.GameNode<Game> {
             var nextCapturedPositions: number[] = []
             for (var i = 0; i < capturedPositions.length; i++) {
                 var index = capturedPositions[i]
-                var captures = getCaptures(node, playerCard, index, com)
+                var playedCard = node.board[index]
+                var captures = getCaptures(node, playedCard, index, com)
 
                 for (var rule in captures) {
                     var ruleCaptures = node.move.captures[rule] = node.move.captures[rule] || []
@@ -554,6 +555,7 @@ function getCaptures(
 
     // Basic rule
     var basicCaptures = []
+
     filteredBoardIndexes.forEach(indexes => {
         var boardIndex = indexes[0]
         var sideIndex = indexes[1]
@@ -564,6 +566,7 @@ function getCaptures(
 
         var sideValue = card.sides[sideIndex];
         var otherValue = otherCard.sides[getOppositeSide(sideIndex)]
+
         var rev = node.rules & RuleSetFlags.Rev
         if (rev && sideValue < otherValue
             || !rev && sideValue > otherValue) {

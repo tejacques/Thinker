@@ -34,7 +34,7 @@
     <TypeScriptCompile Include="lib\GameCard.ts" />
     <TypeScriptCompile Include="lib\Game.ts" />
     <TypeScriptCompile Include="lib\GameNode.ts" />
-    <TypeScriptCompile Include="lib\GamePlayers.ts" />
+    <TypeScriptCompile Include="lib\GamePlayer.ts" />
     <TypeScriptCompile Include="lib\NegaScout.ts" />
     <TypeScriptCompile Include="lib\IterativeDeepening.ts" />
     <TypeScriptCompile Include="lib\NegaMax.ts" />
