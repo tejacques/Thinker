@@ -511,11 +511,19 @@ class Board extends React.Component<BoardProps, BoardState> {
                     var value = e.target['value']
                     var node = this.state.game.clone()
                     var deck: number[]
+                    var hand: number[] = ArrayUtils.fillArray(0, 5)
                     if (value === 'All') {
+                        deck = Game.cardIds
+                        node.players[playerId].rarityRestriction = 4
+                    } else if (value === 'Starter Deck') {
+                        hand = [1, 3, 6, 7, 10]
                         deck = Game.cardIds
                         node.players[playerId].rarityRestriction = 4
                     } else {
                         var player: GamePlayer.GamePlayer = GamePlayer.players[parseInt(value)]
+                        if (player.hand) {
+                            hand = player.hand
+                        }
                         deck = player.deck
                         node.players[playerId].rarityRestriction = 0
                         if (playerId === 1) {
@@ -524,6 +532,7 @@ class Board extends React.Component<BoardProps, BoardState> {
                         }
                     }
                     node.players[playerId].deck = deck
+                    node.players[playerId].hand = hand
                     this.setState({
                         game: node
                     })
@@ -532,7 +541,12 @@ class Board extends React.Component<BoardProps, BoardState> {
                 React.DOM.option({
                     value: 'All',
                     key: 'All',
-                }, 'Player')].concat(GamePlayer.players.map((player, index) => React.DOM.option({
+                }, 'Player'),
+                React.DOM.option({
+                    value: 'Starter Deck',
+                    key: 'Starter Deck',
+                }, 'Starter Deck')
+            ].concat(GamePlayer.players.map((player, index) => React.DOM.option({
                 value: String(index),
                 key: player.name,
             }, player.name))))
@@ -601,6 +615,11 @@ class Board extends React.Component<BoardProps, BoardState> {
                         player.hand[index] = 0
                         player.deck.push(cardId)
                     })
+                    player.deck = Game.legalDeckFilter(
+                        player.hand,
+                        player.deck,
+                        player.rarityRestriction)
+
                     ArrayUtils.numericSort(player.deck, x => x)
                     this.setState({
                         game: node,
