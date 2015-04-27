@@ -221,6 +221,43 @@ export function RuleSetFlagsToStrings(ruleSetFlags) {
 
 type BoardCaptures = NDictionary<RuleSetFlags, number[][]>
 
+function hasFaceDownCard(hand: number[]) {
+    var len = hand.length
+    for (var i = 0; i < len; i++) {
+        if (hand[i] === 0) return true
+    }
+    return false
+}
+
+function getIndexes(
+    arr: Array<Object>,
+    predicate: (item: Object, index?: number) => boolean) {
+
+    var len = arr.length
+    var indexes: number[] = []
+
+    for (var i = 0; i < len; i++) {
+        var item = arr[i]
+        if (predicate(item, i)) {
+            indexes.push(i)
+        }
+    }
+
+    return indexes
+}
+
+function getPlayableBoardIndexes(board: Board) {
+    var len = board.length
+    var playableIndexes: number[] = []
+    for (var i = 0; i < len; i++) {
+        var playerCard = board[i]
+        if (!playerCard) {
+            playableIndexes.push(i)
+        }
+    }
+    return playableIndexes
+}
+
 export class Game implements Nodes.GameNode<Game> {
     parent: Game
     board: Board
@@ -318,10 +355,6 @@ export class Game implements Nodes.GameNode<Game> {
         var deckIndex = 0
         var boardIndex = 0
 
-        var getIndexes = (arr: Array<Object>, predicate: (item: Object, index?: number) => boolean) => arr
-            .map((item, index) => predicate(item, index) ? index : -1)
-            .filter(val => val >= 0)
-
         // Valid hand indexes are any non nulls
         var handIndexes = getIndexes(player.hand, item => item !== null)
         // Valid deck indexes are any
@@ -383,6 +416,11 @@ export class Game implements Nodes.GameNode<Game> {
             }
         }
         return iterator
+    }
+    getDeterministicMoves() {
+        // Gets only the face up card moves
+    }
+    getProbabilisticMoves() {
     }
     clone() {
         return new Game(this.board, this.players, this.turn, this.firstMove, this.rules, this.parent)
