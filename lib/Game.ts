@@ -417,7 +417,7 @@ export class Game implements Nodes.GameNode<Game> {
         }
         return iterator
     }
-    getHandMoves() {
+    getDeterministicMoves() {
         // Gets only the face up card moves
         var player = this.getPlayer()
 
@@ -448,7 +448,7 @@ export class Game implements Nodes.GameNode<Game> {
 
         return moves
     }
-    getDeckMoves() {
+    getProbabilisticMoves() {
         // Gets only the face up card moves
         var player = this.getPlayer()
 
