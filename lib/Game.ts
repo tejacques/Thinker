@@ -417,10 +417,74 @@ export class Game implements Nodes.GameNode<Game> {
         }
         return iterator
     }
-    getDeterministicMoves() {
+    getHandMoves() {
         // Gets only the face up card moves
+        var player = this.getPlayer()
+
+        var playableCards = player.hand
+        var index = 0
+        var handIndex = 0
+        var handLen = player.hand.length
+        // Valid board indexes are nulls (unplayed positions)
+        var boardIndexes = getIndexes(this.board, item => !item)
+        var boardIndex = 0
+        var moves: Game[] = []
+
+        // Valid hand indexes are values greater than 0 and not null
+        for (handIndex = 0; handIndex < handLen; handIndex++) {
+            var cardId = player.hand[handIndex]
+            if (!cardId) {
+                continue
+            }
+            for (boardIndex = 0; boardIndex < boardIndexes.length; boardIndex++) {
+                var boardIdx = boardIndexes[boardIndex]
+                var node = this.playCard(
+                    handIndex,
+                    0,
+                    boardIdx)
+                moves.push(node)
+            }
+        }
+
+        return moves
     }
-    getProbabilisticMoves() {
+    getDeckMoves() {
+        // Gets only the face up card moves
+        var player = this.getPlayer()
+
+        var playableCards = player.hand
+        var index = 0
+        var handIndex = 0
+        var handLen = player.hand.length
+        var deckIndex = 0
+        var deckLen = player.hand.length
+        // Valid board indexes are nulls (unplayed positions)
+        var boardIndexes = getIndexes(this.board, item => !item)
+        var boardIndex = 0
+        var moves: Game[] = []
+
+        var hasFaceDownCard = false
+        for(handIndex = 0; handIndex < handLen; handIndex++) {
+            var cardId = player.hand[handIndex]
+            if (cardId === 0) {
+                hasFaceDownCard = true
+                break
+            }
+        }
+
+        // Valid hand indexes are values greater than 0 and not null
+        for (boardIndex = 0; hasFaceDownCard && boardIndex < boardIndexes.length; boardIndex++) {
+            var boardIdx = boardIndexes[boardIndex]
+            for (deckIndex = 0; deckIndex < deckLen; deckIndex++) {
+                var node = this.playCard(
+                    handIndex,
+                    player.deck[deckIndex],
+                    boardIdx)
+                moves.push(node)
+            }
+        }
+
+        return moves
     }
     clone() {
         return new Game(this.board, this.players, this.turn, this.firstMove, this.rules, this.parent)
