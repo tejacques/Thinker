@@ -31,13 +31,15 @@
     <TypeScriptCompile Include="interface\ReactUtils.ts" />
     <TypeScriptCompile Include="interface\Utils.ts" />
     <TypeScriptCompile Include="lib\ArrayUtils.ts" />
+    <TypeScriptCompile Include="lib\Choose.ts" />
     <TypeScriptCompile Include="lib\GameCard.ts" />
     <TypeScriptCompile Include="lib\Game.ts" />
     <TypeScriptCompile Include="lib\GameNode.ts" />
     <TypeScriptCompile Include="lib\GamePlayer.ts" />
+    <TypeScriptCompile Include="lib\NegaMax.ts" />
     <TypeScriptCompile Include="lib\NegaScout.ts" />
     <TypeScriptCompile Include="lib\IterativeDeepening.ts" />
-    <TypeScriptCompile Include="lib\NegaMax.ts" />
+    <TypeScriptCompile Include="lib\ExpectiNegaMax.ts" />
     <Content Include="assets\img\bg.png" />
     <Content Include="assets\img\face\001.png" />
     <Content Include="assets\img\face\002.png" />

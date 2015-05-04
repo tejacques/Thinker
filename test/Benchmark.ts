@@ -1,11 +1,20 @@
-﻿import expect = require('expect.js');
+﻿import Game = require('../lib/Game')
+import GameCard = require('../lib/GameCard')
+import ArrayUtils = require('../lib/ArrayUtils')
+import Range = require('../lib/Range')
 
-import Game = require('../lib/Game')
-import GameNode = require('../lib/GameNode')
-import testVars = require('./TestVars')
-import NegaMax = require('../lib/NegaMax')
-import NegaScout = require('../lib/NegaScout')
-import IterativeDeepening = require('../lib/IterativeDeepening')
-import TT = require('../lib/TranspositionTable')
-import printBoard = require('../lib/PrintBoard')
-import range = require('../lib/Range')
+
+var game = new Game.Game(
+    Game.newBoard(),
+    [
+        new Game.Player(ArrayUtils.fillArray(0, 5), Game.cardIds),
+        new Game.Player(ArrayUtils.fillArray(0, 5), Game.cardIds, 0) // NPC Has no rarity restriction
+    ],
+    0,
+    0,
+    Game.RuleSetFlags.None
+    )
+
+for (var i = 0; i < 1000000; i++) {
+    game = game.clone()
+}

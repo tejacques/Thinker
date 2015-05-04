@@ -1,4 +1,6 @@
-﻿export class Card {
+﻿var atob = this && this.atob || <(s: string) => string>require('atob')
+
+export class Card {
     name: string
     number: number
     rarity: number

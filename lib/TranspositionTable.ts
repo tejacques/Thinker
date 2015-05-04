@@ -17,7 +17,7 @@ export interface Entry<T> {
     value: number
 }
 
-export class TranspositionTable<T extends GameNode.GameNode<any>> {
+export class TranspositionTable<T extends GameNode.Node<any>> {
     accesses: number = 0
     hits: number = 0
     private cache: LRU.Cache<Entry<T>>
@@ -51,8 +51,8 @@ export type Search = <T extends GameNode.GameNode<any>>(
     ttable?: TranspositionTable<GameNode.GameNode<T>>
 ) => GameNode.GameNodeScore<T>
 
-export type ExtensibleSearch = <T extends GameNode.GameNode<any>>(
-    node: GameNode.GameNode<T>,
+export type ExtensibleSearch = <T extends GameNode.Node<any>>(
+    node: GameNode.Node<T>,
     depth: number,
     alpha: number,
     beta: number,
@@ -60,16 +60,16 @@ export type ExtensibleSearch = <T extends GameNode.GameNode<any>>(
     time?: number,
     start?: number,
     search?: any
-) => GameNode.GameNodeScore<T>
+) => GameNode.GameNodeScoreBase<GameNode.Node<T>>
 
 // A generic wrapper which takes a search function and puts a TranspositionTable
 // around it
-export function UseTranspositionTable<T extends GameNode.GameNode<any>>(
+export function UseTranspositionTable<T extends GameNode.Node<any>>(
     search: ExtensibleSearch,
-    ttable: TranspositionTable<GameNode.GameNode<T>>) {
+    ttable: TranspositionTable<GameNode.Node<T>>) {
 
     var ttSearch: ExtensibleSearch = (
-        node: GameNode.GameNode<T>,
+        node: GameNode.Node<T>,
         depth: number,
         alpha: number,
         beta: number,
@@ -104,9 +104,8 @@ export function UseTranspositionTable<T extends GameNode.GameNode<any>>(
 
         // Transposition Table Store
         if (ttable) {
-            ttEntry = ttEntry || <Entry<GameNode.GameNode<T>>>{}
+            ttEntry = ttEntry || <Entry<GameNode.Node<T>>>{}
             ttEntry.node = node
-            ttEntry.endNode = best.endNode
             ttEntry.value = best.score
             ttEntry.depth = depth
             if (best.score <= alphaOrig) {

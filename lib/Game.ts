@@ -1,6 +1,7 @@
 ﻿import Nodes = require('./GameNode')
 import GameCard = require('./GameCard')
 import range = require('./Range')
+import Choose = require('./Choose')
 export var cardList = GameCard.cardList
 export var cardIds = range(1, 80)
 type Card = GameCard.Card
@@ -89,13 +90,34 @@ export class Player {
     hand: number[]
     deck: number[]
     rarityRestriction: number
-    constructor(hand: number[], deck: number[], rarityRestriction: number = 4) {
+    numFaceDownCards: number
+    constructor(
+        hand: number[],
+        deck: number[],
+        rarityRestriction: number = 4,
+        numFaceDownCards?: number) {
         this.hand = hand.slice()
         this.rarityRestriction = rarityRestriction
         this.deck = legalDeckFilter(hand, deck, this.rarityRestriction)
+        if (numFaceDownCards !== undefined) {
+            this.numFaceDownCards = numFaceDownCards
+        } else {
+            this.numFaceDownCards = 0
+            for (var handIndex = 0, handLen = hand.length;
+                handIndex < handLen; handIndex++) {
+                var cardId = this.hand[handIndex]
+                if (cardId === 0) {
+                    this.numFaceDownCards++
+                }
+            }
+        }
     }
     clone() {
-        return new Player(this.hand, this.deck, this.rarityRestriction)
+        return new Player(
+            this.hand,
+            this.deck,
+            this.rarityRestriction,
+            this.numFaceDownCards)
     }
 }
 
@@ -258,22 +280,35 @@ function getPlayableBoardIndexes(board: Board) {
     return playableIndexes
 }
 
-export class Game implements Nodes.GameNode<Game> {
+export interface GameMove {
+    boardIndex: number
+    handIndex: number
+    handId: number
+    deckIndex: number
+    deckId: number
+    player: number
+    card: Card
+    captures: BoardCaptures
+}
+
+var captureIndex = (node: Game, index: number, playerId: number) => {
+    node.board[index].player = playerId
+}
+
+export class Game implements
+    Nodes.GameNode<Game>,
+    Nodes.PDGameNode<Game>
+{
     parent: Game
     board: Board
     players: Player[]
     firstMove: number
     turn: number
     rules: RuleSetFlags
-    move: {
-        boardIndex: number
-        handIndex: number
-        deckIndex: number
-        player: number
-        card: Card
-        captures: BoardCaptures
-    }
+    move: GameMove
     originalNode: Game
+    zobristLow: number
+    zobristHigh: number
     constructor(
         board: Board,
         players: Player[],
@@ -288,12 +323,19 @@ export class Game implements Nodes.GameNode<Game> {
         this.rules = rules
         this.originalNode = this
         this.parent = parent || null
+
     }
     getPlayerId() {
         return (this.turn + this.firstMove) % this.players.length
     }
+    getOtherPlayerId() {
+        return (this.turn + this.firstMove + 1) % this.players.length
+    }
     getPlayer() {
         return this.players[this.getPlayerId()]
+    }
+    getOtherPlayer() {
+        return this.players[this.getOtherPlayerId()]
     }
     private _value: number = -10
     value() {
@@ -486,12 +528,28 @@ export class Game implements Nodes.GameNode<Game> {
 
         return moves
     }
+    pBestMove(rank, num) {
+        // Other player because we're looking at the person who just went
+        var player = this.getOtherPlayer()
+        var hand = player.hand
+        var handIndex: number
+        var handLen = hand.length
+        var numFaceDownCards = player.numFaceDownCards
+        var p = Choose(player.deck.length, numFaceDownCards - 1) /
+            Choose(num, numFaceDownCards)
+
+        return p
+    }
     clone() {
         return new Game(this.board, this.players, this.turn, this.firstMove, this.rules, this.parent)
     }
     playCard(handIndex: number, deckIndex: number, boardIndex: number): Game {
         var node = this.clone()
         node.parent = this
+        Game.playCardStatic(node, handIndex, deckIndex, boardIndex)
+        return node
+    }
+    static playCardStatic(node: Game, handIndex: number, deckIndex: number, boardIndex: number): GameMove {
         var playerId = node.getPlayerId()
         var player = node.players[playerId]
 
@@ -500,6 +558,10 @@ export class Game implements Nodes.GameNode<Game> {
         var deckId = player.deck[deckIndex]
         var cardId = handId || deckId
         var card = cardList[cardId]
+
+        if (handId === 0) {
+            player.numFaceDownCards--
+        }
 
         // Remove card from player's deck, as well as any card that break the rarity rule
         if (player.deck.length) {
@@ -518,8 +580,11 @@ export class Game implements Nodes.GameNode<Game> {
         node.move = {
             boardIndex: boardIndex,
             handIndex: handIndex,
+            handId: handId,
             deckIndex: deckIndex,
+            deckId: deckId,
             player: playerId,
+            deck: player.deck,
             card: card,
             captures: {},
         }
@@ -529,7 +594,7 @@ export class Game implements Nodes.GameNode<Game> {
         var capturedPositions = [boardIndex];
         var com = false;
 
-        var captureIndex = (index: number) => {
+        var captureIndex = (node: Game, index: number, playerId: number) => {
             node.board[index].player = playerId
         }
 
@@ -554,7 +619,7 @@ export class Game implements Nodes.GameNode<Game> {
                 com = true
 
                 // Capture the positions
-                currentCapturePositions.forEach(captureIndex)
+                currentCapturePositions.forEach(index => captureIndex(node, index, playerId))
 
                 nextCapturedPositions.push.apply(nextCapturedPositions, currentCapturePositions)
             }
@@ -570,13 +635,46 @@ export class Game implements Nodes.GameNode<Game> {
         // Capture the positions
         for (var rule in node.move.captures) {
             var ruleCaptures = node.move.captures[rule]
-            ruleCaptures.forEach(captureLevel => captureLevel.forEach(captureIndex))
+            ruleCaptures.forEach(captureLevel =>
+                captureLevel.forEach(index =>
+                    captureIndex(node, index, playerId)))
         }
 
         // Bump turn number
         node.turn++
-        return node
+
+        // Zobrist Hash Change
+        return node.move
     }
+    makeMove(handIndex: number, deckIndex: number, boardIndex: number): GameMove {
+        return Game.playCardStatic(this, handIndex, deckIndex, boardIndex)
+    }
+    unamkeMove(move: GameMove) {
+        var node = this
+
+        // Drop turn number
+        node.turn--
+
+        var playerId = node.getPlayerId()
+        var player = node.players[playerId]
+        var otherPlayerId = node.getOtherPlayerId()
+
+        // Uncapture the positions
+        for (var rule in node.move.captures) {
+            var ruleCaptures = node.move.captures[rule]
+            ruleCaptures.forEach(captureLevel =>
+                captureLevel.forEach(index =>
+                    captureIndex(node, index, otherPlayerId)))
+        }
+
+        // Bump number of face down cards, if necessary
+        if (move.handId === 0) {
+            player.numFaceDownCards++
+        }
+
+        // Zobrist Hash Change
+    }
+    
     toString() {
         // Retun a JSON representation of the board without metadata
         var s = '{'

@@ -62,6 +62,9 @@ function NegaScout<T extends GameNode.GameNode<any>>(
         var ttEntry = ttable.get(node)
         if (ttEntry && ttEntry.depth >= depth) {
             if (ttEntry.flag === TT.Flag.Exact) {
+                best.node = ttEntry.node
+                best.score == ttEntry.value
+                return best
             } else if (ttEntry.flag === TT.Flag.Lowerbound) {
                 alpha = Math.max(alpha, ttEntry.value)
             } else if (ttEntry.flag === TT.Flag.Upperbound) {
