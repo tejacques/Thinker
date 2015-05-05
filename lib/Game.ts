@@ -46,17 +46,21 @@ export function getRandomHand(deck: Deck, rarityRestriction: number) {
     return hand
 }
 
-var rarityIdMap = {
+var rarityIdMap: { [key: number] : number; default: number } = {
     2: 20,
     3: 36,
     4: 50,
     5: 60,
     6: Infinity,
-    'default': Infinity,
+    default: Infinity,
 }
 
-export function legalDeckFilter(hand: number[], deck: number[], rarityRestriction) {
-    var handDict = {}
+export function legalDeckFilter(
+        hand: number[],
+        deck: number[],
+        rarityRestriction: number) {
+
+    var handDict: { [key: number]: boolean } = {}
     var maxCardId = 0
     var handLen = hand.length
     var i: number
@@ -64,7 +68,7 @@ export function legalDeckFilter(hand: number[], deck: number[], rarityRestrictio
         var handId = hand[i]
         if (handId) {
             maxCardId = Math.max(maxCardId, handId)
-            handDict[handId] = 1
+            handDict[handId] = true
         }
     }
 
@@ -181,7 +185,7 @@ var words = [
     'Random',    // 19
 ]
 
-export function RuleSetFlagsToStrings(ruleSetFlags) {
+export function RuleSetFlagsToStrings(ruleSetFlags: RuleSetFlags) {
     var res: string[] = []
     var s: string
 
@@ -528,7 +532,7 @@ export class Game implements
 
         return moves
     }
-    pBestMove(rank, num) {
+    pBestMove(rank: number, num: number) {
         // Other player because we're looking at the person who just went
         var player = this.getOtherPlayer()
         var hand = player.hand
@@ -747,7 +751,7 @@ function getCaptures(
         .filter(indexes => !!node.board[indexes[0]])
 
     // Only capture if the card is present and the player is different
-    var filterOtherPlayer = indexes => {
+    var filterOtherPlayer = (indexes: number[]) => {
         var boardIndex = indexes[0]
         return node.board[boardIndex].player !== playerCard.player
     }
@@ -756,7 +760,7 @@ function getCaptures(
     var card = cardList[playerCard.card]
 
     // Basic rule
-    var basicCaptures = []
+    var basicCaptures: number[] = []
 
     filteredBoardIndexes.forEach(indexes => {
         var boardIndex = indexes[0]
@@ -789,7 +793,7 @@ function getCaptures(
     // Rules.Sam
     // Can use own or opponents cards.
     if (!com && (node.rules & RuleSetFlags.Sam)) {
-        var samFilter = indexes => {
+        var samFilter = (indexes: [number, number]) => {
             var boardIndex = indexes[0]
             var sideIndex = indexes[1]
 
@@ -816,7 +820,7 @@ function getCaptures(
     // Can use own or opponents cards.
     if (!com && (node.rules & RuleSetFlags.Plu)) {
         // Map each adjacent card to it's sum
-        var pluMap = indexes => {
+        var pluMap = (indexes: [number, number]) => {
             var boardIndex = indexes[0]
             var sideIndex = indexes[1]
 

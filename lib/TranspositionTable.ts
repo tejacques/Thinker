@@ -32,7 +32,7 @@ export class TranspositionTable<T extends GameNode.Node<any>> {
             return entry
         }
         return null
-    } 
+    }
     set(node: T, entry: Entry) {
         return this.table[node.zobristLow & ZobristHash.mask] = entry
     }

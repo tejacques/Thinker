@@ -35,7 +35,7 @@ class BitStringGenerator {
         this.mti = N + 1;
         this.setSeed(0x1BADF00D);
     }
-    setSeed = function (...args) {
+    setSeed = function (...args: any[]) {
         switch (args.length) {
             case 1:
                 if (args[0].constructor === Number) {
