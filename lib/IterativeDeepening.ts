@@ -41,7 +41,7 @@ function IterativeDeepening<T extends GameNode.GameNode<any>>(
         var nextScore = -Infinity
         for (var nsIndex = 0; nsIndex < nodeScoresLen; nsIndex++) {
             child = nodeScores[nsIndex][0]
-            var value = -search(node,
+            var value = -search(child,
                 depth - 1,
                 -beta,
                 -alpha,
