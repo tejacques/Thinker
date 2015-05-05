@@ -34,3 +34,6 @@ bin/
 
 # NTVS
 .ntvs*
+
+# Mac
+.DS_Store
