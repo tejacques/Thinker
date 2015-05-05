@@ -6,6 +6,8 @@ export interface Node<T extends Node<any>> {
     value: () => number
     isTerminal: () => boolean
     originalNode: T
+    zobristLow: number
+    zobristHigh: number
 }
 
 export interface GameNode<T extends GameNode<any>> extends Node<T> {
@@ -21,18 +23,16 @@ export interface PDGameNode<T extends PDGameNode<any>> extends Node<T> {
 
 export interface GameNodeScoreBase<T> {
     score: number
+    depthReached: number
     node: T
 }
 
 export interface GameNodeScore<T extends GameNode<any>>
     extends GameNodeScoreBase<GameNode<T>> {
-    score: number
-    endNode: GameNode<T>
 }
 
 export interface PDGameNodeScore<T extends PDGameNode<any>>
     extends GameNodeScoreBase<PDGameNode<T>> {
-    score: number
 }
 
 export interface Options {

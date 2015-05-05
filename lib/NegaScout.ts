@@ -15,7 +15,7 @@ function OrderMoves<T extends GameNode.GameNode<any>>(
 
     var moveEntries = moves.map((move): [GameNode.GameNode<T>, number]=> {
         var value: number
-        var entry: TT.Entry<GameNode.GameNode<T>>
+        var entry: TT.Entry
 
         if (ttable && (entry = ttable.get(move))) {
             value = entry.value
@@ -44,7 +44,7 @@ function NegaScout<T extends GameNode.GameNode<any>>(
 
     var best: GameNode.GameNodeScore<T> = {
         node: null,
-        endNode: null,
+        depthReached: depth,
         score: -Infinity
     }
 
@@ -62,7 +62,6 @@ function NegaScout<T extends GameNode.GameNode<any>>(
         var ttEntry = ttable.get(node)
         if (ttEntry && ttEntry.depth >= depth) {
             if (ttEntry.flag === TT.Flag.Exact) {
-                best.node = ttEntry.node
                 best.score == ttEntry.value
                 return best
             } else if (ttEntry.flag === TT.Flag.Lowerbound) {
@@ -72,8 +71,6 @@ function NegaScout<T extends GameNode.GameNode<any>>(
             }
 
             if (alpha >= beta) {
-                best.node = ttEntry.node
-                best.endNode = ttEntry.endNode
                 best.score = ttEntry.value
                 return best
             }
@@ -82,8 +79,6 @@ function NegaScout<T extends GameNode.GameNode<any>>(
 
     var terminal = node.isTerminal()
     if (depth === 0 || terminal) {
-        best.node = node
-        best.endNode = node
         best.score = color * node.value()
 
         return best
@@ -120,8 +115,6 @@ function NegaScout<T extends GameNode.GameNode<any>>(
 
         var value = ns.score
         if (value > best.score) {
-            best.score = value
-            best.endNode = ns.endNode
             best.node = child
         }
 
@@ -138,9 +131,7 @@ function NegaScout<T extends GameNode.GameNode<any>>(
 
     // Transposition Table Store
     if (ttable) {
-        ttEntry = ttEntry || <TT.Entry<GameNode.GameNode<T>>>{}
-        ttEntry.node = node
-        ttEntry.endNode = best.endNode
+        ttEntry = ttEntry || <TT.Entry>{}
         ttEntry.value = best.score
         ttEntry.depth = depth
         if (best.score <= alphaOrig) {
@@ -150,7 +141,7 @@ function NegaScout<T extends GameNode.GameNode<any>>(
         } else {
             ttEntry.flag = TT.Flag.Exact
         }
-        ttable.set(ttEntry)
+        ttable.set(node, ttEntry)
     }
 
     return best
@@ -173,7 +164,7 @@ function IIDNegaScout<T extends GameNode.GameNode<any>>(
 
     var best: GameNode.GameNodeScore<T> = {
         node: null,
-        endNode: null,
+        depthReached: maxDepth,
         score: -Infinity
     }
 
@@ -198,8 +189,6 @@ function IIDNegaScout<T extends GameNode.GameNode<any>>(
             }
 
             if (alpha >= beta) {
-                best.node = ttEntry.node
-                best.endNode = ttEntry.endNode
                 best.score = ttEntry.value
                 return best
             }
@@ -209,7 +198,6 @@ function IIDNegaScout<T extends GameNode.GameNode<any>>(
     var terminal = node.isTerminal()
     if (maxDepth === 0 || terminal) {
         best.node = node
-        best.endNode = node
         best.score = color * node.value()
 
         return best
@@ -232,7 +220,7 @@ function IIDNegaScout<T extends GameNode.GameNode<any>>(
 
         var nextBest: GameNode.GameNodeScore<T> = {
             node: null,
-            endNode: null,
+            depthReached: newDepth,
             score: -Infinity
         }
 
@@ -258,7 +246,6 @@ function IIDNegaScout<T extends GameNode.GameNode<any>>(
             var value = ns.score
             if (value > nextBest.score) {
                 nextBest.score = value
-                nextBest.endNode = ns.endNode
                 nextBest.node = child
             }
 
@@ -279,9 +266,7 @@ function IIDNegaScout<T extends GameNode.GameNode<any>>(
 
     // Transposition Table Store
     if (ttable) {
-        ttEntry = ttEntry || <TT.Entry<GameNode.GameNode<T>>>{}
-        ttEntry.node = node
-        ttEntry.endNode = best.endNode
+        ttEntry = ttEntry || <TT.Entry>{}
         ttEntry.value = best.score
         ttEntry.depth = maxDepth
         if (best.score <= alphaOrig) {
@@ -291,7 +276,7 @@ function IIDNegaScout<T extends GameNode.GameNode<any>>(
         } else {
             ttEntry.flag = TT.Flag.Exact
         }
-        ttable.set(ttEntry)
+        ttable.set(node, ttEntry)
     }
 
     return best

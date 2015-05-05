@@ -28,7 +28,7 @@ function ExpectiNegaMax<T extends GameNode.PDGameNode<any>> (
     }
 
     var alphaOrig = alpha
-    var ttEntry: TT.Entry<GameNode.PDGameNode<T>>
+    var ttEntry: TT.Entry
 
     if (ttable) {
         ttEntry = ttable.get(node)
@@ -148,8 +148,7 @@ function ExpectiNegaMax<T extends GameNode.PDGameNode<any>> (
 
     // Transposition Table Store
     if (ttable) {
-        ttEntry = ttEntry || <TT.Entry<GameNode.PDGameNode<T>>>{}
-        ttEntry.node = node
+        ttEntry = ttEntry || <TT.Entry>{}
         ttEntry.value = score
         ttEntry.depth = depth
         if (score <= alphaOrig) {
@@ -159,7 +158,7 @@ function ExpectiNegaMax<T extends GameNode.PDGameNode<any>> (
         } else {
             ttEntry.flag = TT.Flag.Exact
         }
-        ttable.set(ttEntry)
+        ttable.set(node, ttEntry)
     }
 
     return score

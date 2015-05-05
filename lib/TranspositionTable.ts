@@ -1,7 +1,6 @@
-﻿import LRU = require('lru-cache')
-import GameNode = require('./GameNode')
+﻿import GameNode = require('./GameNode')
+import ZobristHash = require('./ZobristHash')
 
-var cache = LRU(50000)
 
 export enum Flag {
     Exact,
@@ -9,31 +8,33 @@ export enum Flag {
     Lowerbound,
 }
 
-export interface Entry<T> {
+export interface Entry {
+    low: number
+    high: number
     depth: number
     flag: Flag
-    node: T
-    endNode: T
     value: number
 }
 
 export class TranspositionTable<T extends GameNode.Node<any>> {
     accesses: number = 0
     hits: number = 0
-    private cache: LRU.Cache<Entry<T>>
+    private table: Entry[] = Array(ZobristHash.mask+1)
     constructor(max) {
-        this.cache = LRU<Entry<T>>(max)
     }
-    get(node: T): Entry<T> {
+    get(node: T): Entry {
         this.accesses++
-        var entry = this.cache.get(node.toString())
-        if (entry) {
+        var entry = this.table[node.zobristLow & ZobristHash.mask]
+        if (entry
+            && entry.low === node.zobristLow
+            && entry.high === node.zobristHigh) {
             this.hits++
+            return entry
         }
-        return entry
+        return null
     } 
-    set(entry: Entry<T>) {
-        return this.cache.set(entry.node.toString(), entry)
+    set(node: T, entry: Entry) {
+        return this.table[node.zobristLow & ZobristHash.mask] = entry
     }
     hitRate() {
         return this.hits / this.accesses
@@ -46,21 +47,26 @@ export type Search = <T extends GameNode.GameNode<any>>(
     alpha: number,
     beta: number,
     color: number,
-    time?: number,
-    start?: number,
+    timer?: {
+        timedout: boolean
+        timeout: number
+        start: number
+    },
     ttable?: TranspositionTable<GameNode.GameNode<T>>
-) => GameNode.GameNodeScore<T>
-
+) => number
 export type ExtensibleSearch = <T extends GameNode.Node<any>>(
     node: GameNode.Node<T>,
     depth: number,
     alpha: number,
     beta: number,
     color: number,
-    time?: number,
-    start?: number,
+    timer?: {
+        timedout: boolean
+        timeout: number
+        start: number
+    },
     search?: any
-) => GameNode.GameNodeScoreBase<GameNode.Node<T>>
+) => number
 
 // A generic wrapper which takes a search function and puts a TranspositionTable
 // around it
@@ -74,8 +80,11 @@ export function UseTranspositionTable<T extends GameNode.Node<any>>(
         alpha: number,
         beta: number,
         color: number,
-        time?: number,
-        start?: number,
+        timer?: {
+            timedout: boolean
+            timeout: number
+            start: number
+        },
         searchArg?: ExtensibleSearch) => {
 
         var alphaOrig = alpha
@@ -91,34 +100,40 @@ export function UseTranspositionTable<T extends GameNode.Node<any>>(
                 }
 
                 if (alpha >= beta) {
-                    return {
-                        node: ttEntry.node,
-                        endNode: ttEntry.endNode,
-                        score: ttEntry.value
-                    }
+                    return ttEntry.value
                 }
             }
         }
 
-        var best = search(node, depth, alpha, beta, color, time, start, ttSearch)
+        var score = search(
+            node,
+            depth,
+            alpha,
+            beta,
+            color,
+            timer,
+            ttSearch)
+
+        if (timer && timer.timedout) {
+            return score
+        }
 
         // Transposition Table Store
         if (ttable) {
-            ttEntry = ttEntry || <Entry<GameNode.Node<T>>>{}
-            ttEntry.node = node
-            ttEntry.value = best.score
+            ttEntry = ttEntry || <Entry>{}
+            ttEntry.value = score
             ttEntry.depth = depth
-            if (best.score <= alphaOrig) {
+            if (score <= alphaOrig) {
                 ttEntry.flag = Flag.Upperbound
-            } else if (best.score >= beta) {
+            } else if (score >= beta) {
                 ttEntry.flag = Flag.Lowerbound
             } else {
                 ttEntry.flag = Flag.Exact
             }
-            ttable.set(ttEntry)
+            ttable.set(node, ttEntry)
         }
 
-        return best
+        return score
     }
 
     return ttSearch

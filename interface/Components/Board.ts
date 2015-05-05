@@ -643,6 +643,7 @@ class Board extends React.Component<BoardProps, BoardState> {
                 onClick: () => {
                     var color = game.getPlayerId() === 0 ? 1 : -1
                     var time = 10000
+                    var node = this.state.game.clone()
                     var next = IterativeDeepening(
                         this.state.game,
                         NegaMax,
@@ -650,7 +651,7 @@ class Board extends React.Component<BoardProps, BoardState> {
                         color,
                         time,
                         null,
-                        node => node.isTerminal())
+                        depthReached => node.turn + depthReached >= 9)
                     this.setState({
                         game: next.node.originalNode
                     })

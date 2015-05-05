@@ -4,7 +4,7 @@ import BitStringGenerator = require('./BitStringGenerator')
 class ZobristHash{
     low: number
     high: number
-    mask = ((1 << 22) - 1)
+    static mask = ((1 << 22) - 1)
     lowBits: number[][]
     highBits: number[][]
     generator: BitStringGenerator = new BitStringGenerator()

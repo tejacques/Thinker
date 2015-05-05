@@ -8,36 +8,34 @@ function NegaMax<T extends GameNode.GameNode<any>> (
     alpha: number,
     beta: number,
     color: number,
-    time?: number,
-    start?: number,
+    timer?: {
+        timedout: boolean
+        timeout: number
+        start: number
+    },
     ttable?: TT.TranspositionTable<GameNode.GameNode<T>>
-    ) {
+    ): number {
     'use strict'
 
-    var best: GameNode.GameNodeScore<T> = {
-        node: null,
-        endNode: null,
-        score: -Infinity
-    }
+    var score = -Infinity
 
-    if (time && start) {
-        var now = +new Date()
-        var elapsed = now - start
-        if (elapsed >= time) {
-            return best
+    if (timer) {
+        var now = Date.now()
+        var elapsed = now - timer.start
+        if (elapsed >= timer.timeout) {
+            timer.timedout = true
+            return score
         }
     }
 
     var alphaOrig = alpha
-    var ttEntry: TT.Entry<GameNode.GameNode<T>>
+    var ttEntry: TT.Entry
 
     if (ttable) {
         ttEntry = ttable.get(node)
         if (ttEntry && ttEntry.depth >= depth) {
             if (ttEntry.flag === TT.Flag.Exact) {
-                best.node = ttEntry.node
-                best.score == ttEntry.value
-                return best
+                return ttEntry.value
             } else if (ttEntry.flag === TT.Flag.Lowerbound) {
                 alpha = Math.max(alpha, ttEntry.value)
             } else if (ttEntry.flag === TT.Flag.Upperbound) {
@@ -45,38 +43,25 @@ function NegaMax<T extends GameNode.GameNode<any>> (
             }
 
             if (alpha >= beta) {
-                best.node = ttEntry.node
-                best.endNode = ttEntry.endNode
-                best.score = ttEntry.value
-                return best
+                return ttEntry.value
             }
         }
     }
 
     if (depth === 0 || node.isTerminal()) {
-        best.node = node
-        best.endNode = node
-        best.score = color * node.value()
-
-        return best
+        return color * node.value()
     }
     var iterator = node.getMoveIterator()
     var child: GameNode.GameNode<T>
     while ((child = iterator.getNext())) {
-        var ns = NegaMax(child, depth - 1, -beta, -alpha, -color, time, start, ttable)
-        ns.score = -ns.score
+        var value = -NegaMax(child, depth - 1, -beta, -alpha, -color, timer, ttable)
 
-        // If the node is null, we ran out of time
-        if (ns.node === null) {
-            break
+        // Check if we ran out of time
+        if (timer && timer.timedout) {
+            return -Infinity
         }
 
-        var value = ns.score
-        if (value > best.score) {
-            best.score = value
-            best.node = child
-            best.endNode = ns.endNode
-        }
+        score = Math.max(score, value)
         alpha = Math.max(alpha, value)
         if (alpha >= beta) {
             break
@@ -85,22 +70,20 @@ function NegaMax<T extends GameNode.GameNode<any>> (
 
     // Transposition Table Store
     if (ttable) {
-        ttEntry = ttEntry || <TT.Entry<GameNode.GameNode<T>>>{}
-        ttEntry.node = node
-        ttEntry.endNode = best.endNode
-        ttEntry.value = best.score
+        ttEntry = ttEntry || <TT.Entry>{}
+        ttEntry.value = score
         ttEntry.depth = depth
-        if (best.score <= alphaOrig) {
+        if (score <= alphaOrig) {
             ttEntry.flag = TT.Flag.Upperbound
-        } else if (best.score >= beta) {
+        } else if (score >= beta) {
             ttEntry.flag = TT.Flag.Lowerbound
         } else {
             ttEntry.flag = TT.Flag.Exact
         }
-        ttable.set(ttEntry)
+        ttable.set(node, ttEntry)
     }
 
-    return best
+    return score
 }
 
 export = NegaMax

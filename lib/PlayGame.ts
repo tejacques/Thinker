@@ -58,11 +58,18 @@ function PlayGame(
         var color = moveOffset === turn ? 1 : -1
 
         var start = +new Date()
-        var next = IterativeDeepening(node, AI[turn], 9, color, times[turn], null, node => node.isTerminal())
+        var next = IterativeDeepening(
+            node,
+            AI[turn],
+            9,
+            color,
+            times[turn], null,
+            depthReached => node.turn + depthReached >= 9)
+
         var end = +new Date()
         var elapsed = (end - start)
-        var turnReached = next.endNode.originalNode.turn
-        var depthSearched = turnReached - node.turn
+        var turnReached = next.depthReached + node.turn
+        var depthSearched = next.depthReached
         var newNode = next.node.originalNode
         var move = newNode.move
         var cardId = games[turn].players[turn].hand[move.handIndex]
