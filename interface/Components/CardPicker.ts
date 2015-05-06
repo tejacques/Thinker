@@ -38,7 +38,7 @@ class CardPicker extends React.Component<CardPickerProps, CardPickerState> {
         //  t=4
         //  b>3
         //  l<=6
-        //  r=3 
+        //  r=3
         //
         // property comparison value:
         //  type=beast

@@ -20,8 +20,6 @@ export class TranspositionTable<T extends GameNode.Node<any>> {
     accesses: number = 0
     hits: number = 0
     private table: Entry[] = Array(ZobristHash.mask+1)
-    constructor(max) {
-    }
     get(node: T): Entry {
         this.accesses++
         var entry = this.table[node.zobristLow & ZobristHash.mask]

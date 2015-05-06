@@ -159,10 +159,23 @@ class HandItem extends React.Component<HandItemProps, void> {
     }
 }
 
+type ConfigureDragDropRegistration = (s: string, config: {
+    dragSource?: {
+        beginDrag?: (component: any) => { item: any }
+        canDrag?: (component: any) => boolean
+    }
+    dropTarget?: {
+        acceptDrop?: (component: any, item: any) => void
+        canDrop?: (component: any) => boolean
+        enter?: (component: any, item: any) => void
+        leave?: (component: any, item: any) => void
+    }
+ }) => void
+
 var DraggableHandItem = React.createClass<HandItemProps, {}>({
     mixins: [DragDropMixin],
     statics: {
-        configureDragDrop(register) {
+        configureDragDrop(register: ConfigureDragDropRegistration) {
 
             // Specify all supported types by calling register(type, { dragSource?, dropTarget? })
 
@@ -237,13 +250,13 @@ function getNext(
 var DroppableBoardItem = React.createClass<BoardItemProps, {}>({
     mixins: [DragDropMixin],
     statics: {
-        configureDragDrop(register) {
+        configureDragDrop(register: ConfigureDragDropRegistration) {
             register('HandItem', {
                 dropTarget: {
                     acceptDrop(
                         component: React.Component<BoardItemProps, any>,
                         item: { component: React.Component<HandItemProps, any> }) {
-                        
+
                         component.props.board.setState({
                             game: getNext(component, item),
                             preview: null,
@@ -290,7 +303,7 @@ var DroppableBoardItem = React.createClass<BoardItemProps, {}>({
         var playerCard = game.board[index]
         var dropState = this.getDropState('HandItem')
 
-        var previewColor = null
+        var previewColor: string = null
         if (preview && preview.move && preview.move.captures) {
             var captures = preview.move.captures
             for (var key in captures) {
@@ -373,7 +386,7 @@ interface BoardState {
 }
 
 class Board extends React.Component<BoardProps, BoardState> {
-    state = {
+    state: BoardState = {
         game: this.props.game,
         started: false,
         picker: {

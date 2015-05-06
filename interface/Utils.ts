@@ -1,4 +1,4 @@
-﻿export function pad(num: number, separator: string, s) {
+﻿export function pad(num: number, separator: string, s: any) {
     var str = String(s)
     num = num - str.length
     var padding: string
