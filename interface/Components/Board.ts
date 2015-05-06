@@ -152,7 +152,8 @@ class HandItem extends React.Component<HandItemProps, void> {
             React.createElement(Card, {
                 playerCard: new Game.PlayerCard(
                     game.players[player].hand[index],
-                    player)
+                    player),
+                game: game,
             })
         )
     }
@@ -351,7 +352,8 @@ class BoardItem extends React.Component<BoardItemProps, void> {
         var game = this.props.game
         var index = this.props.index
         return React.createElement(Card, {
-            playerCard: game.board[index]
+            playerCard: game.board[index],
+            game: game,
         })
     }
 }

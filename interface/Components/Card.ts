@@ -109,8 +109,15 @@ var cardTypeStyle: React.CSSProperties = {
     right: 3,
 }
 
+var cardBonusStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: 20,
+    left: 10,
+}
+
 interface CardProps {
     playerCard: Game.PlayerCard
+    game?: Game.Game
 }
 
 class Card extends React.Component<CardProps, void> {
@@ -186,6 +193,16 @@ class Card extends React.Component<CardProps, void> {
                     style: cardTypeStyle,
                     key: 'type',
                 }))
+
+                // Type Bonus
+                //var game = this.props.game
+                //var bonus = 0
+                //if (game && (bonus = Game.getCardTypeBonus(card, game))) {
+                //    cardParts.push(React.DOM.span({
+                //        style: cardBonusStyle,
+                //        key: 'type_bonus',
+                //    }, bonus))
+                //}
             }
         }
 
