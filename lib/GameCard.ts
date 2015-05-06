@@ -17,6 +17,13 @@ export class Card {
     }
 }
 
+export var CardTypes = {
+    Primal: 1,
+    Scion: 2,
+    Beastman: 3,
+    Garlean: 4,
+}
+
 export var cardList: Card[] = [
     {
         name: 'VW5rbm93bg==',

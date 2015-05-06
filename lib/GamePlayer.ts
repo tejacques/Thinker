@@ -127,7 +127,7 @@ export var players: GamePlayer[] = [
     {
         number: 9,
         name: 'R2VnZXJ1anU=',
-        deck: [55, 56, 63, 65, 66],
+        deck: [31, 55, 56, 63, 65, 66],
         reward: [49, 56],
         win: 116,
         lose: 17,
@@ -223,7 +223,8 @@ export var players: GamePlayer[] = [
     {
         number: 17,
         name: 'TW90aGVyIE1pb3VubmU=',
-        deck: [11, 28, 29, 30, 35, 48],
+        hand: [30, 29, 15, 0, 0],
+        deck: [5, 11, 12, 15, 28, 29, 30, 35, 48],
         reward: [12, 16, 30],
         win: 32,
         lose: 4,

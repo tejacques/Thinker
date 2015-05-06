@@ -313,21 +313,38 @@ export class Game implements
     originalNode: Game
     zobristLow: number
     zobristHigh: number
+    bonus: number[]
     constructor(
         board: Board,
         players: Player[],
         turn: number,
         firstMove: number,
         rules: RuleSetFlags,
-        parent?: Game) {
+        value: number = 0,
+        parent?: Game,
+        bonus?: number[]
+        ) {
         this.board = board.map((card) => card? card.clone() : null)
         this.players = players.map((player) => player.clone())
         this.turn = turn;
         this.firstMove = firstMove
         this.rules = rules
         this.originalNode = this
+        this._value = value
         this.parent = parent || null
-
+        this.bonus = bonus && bonus.slice() || [0, 0, 0, 0, 0]
+    }
+    clone() {
+        var node = new Game(
+            this.board,
+            this.players,
+            this.turn,
+            this.firstMove,
+            this.rules,
+            this._value,
+            this.parent,
+            this.bonus)
+        return node
     }
     getPlayerId() {
         return (this.turn + this.firstMove) % this.players.length
@@ -341,29 +358,80 @@ export class Game implements
     getOtherPlayer() {
         return this.players[this.getOtherPlayerId()]
     }
-    private _value: number = -10
+    private _value: number = 0
     value() {
-        if (this._value > -10) {
-            return this._value
-        }
+        // Sum of weight_feature * feature
         // This always scores the value for the first player
-        var val = 0;
-        //var playerId = this.getPlayerId()
-        this.board.forEach((card) => {
-            if (card) {
-                if (card.player === 0) val++
-                else val--
-            }
-        })
 
-        if (this.firstMove === 0) {
-            val--
-        } else {
-            val++
+        // Primary Feature -- how many cards are controlled by the players
+        var cardsControlled: [number, number] = [0, 0];
+        var exposedSides: [number, number] = [0, 0]
+        var exposedValues: [number, number] = [0, 0]
+
+        for (var boardIndex = 0; boardIndex < this.board.length; boardIndex++) {
+            var playerCard = this.board[boardIndex]
+            if (playerCard) {
+                cardsControlled[playerCard.player]++
+
+                var x = boardIndex % 3
+                var y = (boardIndex / 3) | 0
+                var upIndex = boardIndex - 3
+                var rightIndex = boardIndex + 1
+                var downIndex = boardIndex + 3
+                var leftIndex = boardIndex - 1
+
+                var boardIndexes: number[][] = []
+                var card = cardList[playerCard.card]
+
+                if (y > 0 && !this.board[upIndex]) {
+                    // Up
+                    exposedSides[playerCard.player]++
+                    exposedValues[playerCard.player] += card.sides[0]
+                }
+                if (x < 2 && !this.board[rightIndex]) {
+                    // Right
+                    exposedSides[playerCard.player]++
+                    exposedValues[playerCard.player] += card.sides[1]
+                }
+                if (y < 2 && !this.board[downIndex]) {
+                    // Down
+                    exposedSides[playerCard.player]++
+                    exposedValues[playerCard.player] += card.sides[2]
+                }
+                if (x > 0 && !this.board[leftIndex]) {
+                    // Left
+                    exposedSides[playerCard.player]++
+                    exposedValues[playerCard.player] += card.sides[3]
+                }
+            }
         }
 
-        this._value = val
-        return val
+        for (var playerId = 0; playerId < this.players.length; playerId++) {
+            var hand = this.players[playerId].hand
+            for (var handIndex = 0; handIndex < hand.length; handIndex++) {
+                if (null !== hand[handIndex]) {
+                    cardsControlled[playerId]++
+                }
+            }
+        }
+
+        var cardsControlledWeight = 100
+        var exposedSidesWeight = -5
+        var exposedValuesWeight = 5
+
+        var ev = exposedValuesWeight * (
+            (exposedValues[0] ? (exposedValues[0] / exposedSides[0]) : 0) -
+            (exposedValues[1] ? (exposedValues[1] / exposedSides[1]) : 0)
+            )
+
+        this._value = cardsControlledWeight * (cardsControlled[0] - cardsControlled[1]) +
+            exposedSidesWeight * (exposedSides[0] - exposedSides[1]) +
+            exposedValuesWeight * (
+                (exposedValues[0] ? (exposedValues[0] / exposedSides[0]) : 0) -
+                (exposedValues[1] ? (exposedValues[1] / exposedSides[1]) : 0)
+            )
+
+        return this._value
     }
     playerValue(playerId: number) {
         var val = 0;
@@ -544,9 +612,6 @@ export class Game implements
 
         return p
     }
-    clone() {
-        return new Game(this.board, this.players, this.turn, this.firstMove, this.rules, this.parent)
-    }
     playCard(handIndex: number, deckIndex: number, boardIndex: number): Game {
         var node = this.clone()
         node.parent = this
@@ -644,10 +709,20 @@ export class Game implements
                     captureIndex(node, index, playerId)))
         }
 
+        // Type Map
+        if (card.type) {
+            if (node.rules & RuleSetFlags.Asc) {
+                node.bonus[card.type]++
+            } else if (node.rules & RuleSetFlags.Des) {
+                node.bonus[card.type]--
+            }
+        }
+
         // Bump turn number
         node.turn++
 
         // Zobrist Hash Change
+        // TODO
         return node.move
     }
     makeMove(handIndex: number, deckIndex: number, boardIndex: number): GameMove {
@@ -656,8 +731,21 @@ export class Game implements
     unamkeMove(move: GameMove) {
         var node = this
 
+        // Zobrist Hash Change
+        // TODO
+
         // Drop turn number
         node.turn--
+
+        // Type Map
+        var card = move.card
+        if (card.type) {
+            if (node.rules & RuleSetFlags.Asc) {
+                node.bonus[card.type]--
+            } else if (node.rules & RuleSetFlags.Des) {
+                node.bonus[card.type]++
+            }
+        }
 
         var playerId = node.getPlayerId()
         var player = node.players[playerId]
@@ -675,8 +763,6 @@ export class Game implements
         if (move.handId === 0) {
             player.numFaceDownCards++
         }
-
-        // Zobrist Hash Change
     }
     
     toString() {
@@ -719,6 +805,27 @@ interface SDictionary<T extends string, U> {
 
 interface NDictionary<T extends number, U> {
     [key: number]: U
+}
+
+export function getCardTypeBonus(card: GameCard.Card, node: Game) {
+    var bonus = 0
+    if (card.type
+        && (node.rules & (RuleSetFlags.Asc | RuleSetFlags.Des))
+        ) {
+        bonus = node.bonus[card.type]
+    }
+    return bonus
+}
+
+function getAdjustedValue(card: GameCard.Card, side: number, node: Game) {
+    var sideValue = card.sides[side]
+    if (card.type && (node.rules & (RuleSetFlags.Asc | RuleSetFlags.Des))) {
+        sideValue += getCardTypeBonus(card, node)
+        sideValue = Math.max(sideValue, 1)
+        sideValue = Math.min(sideValue, 10)
+    }
+
+    return sideValue
 }
 
 function getCaptures(
@@ -770,8 +877,12 @@ function getCaptures(
         var sideCard = node.board[boardIndex]
         var otherCard = cardList[sideCard.card]
 
-        var sideValue = card.sides[sideIndex];
-        var otherValue = otherCard.sides[getOppositeSide(sideIndex)]
+        var sideValue = getAdjustedValue(card, sideIndex, node)
+
+        var otherValue = getAdjustedValue(
+            otherCard,
+            getOppositeSide(sideIndex),
+            node)
 
         var rev = node.rules & RuleSetFlags.Rev
         if (rev && sideValue < otherValue
@@ -800,8 +911,12 @@ function getCaptures(
             var sideCard = node.board[boardIndex]
             var otherCard = cardList[sideCard.card]
 
-            var sideValue = card.sides[sideIndex];
-            var otherValue = otherCard.sides[getOppositeSide(sideIndex)]
+            var sideValue = getAdjustedValue(card, sideIndex, node)
+
+            var otherValue = getAdjustedValue(
+                otherCard,
+                getOppositeSide(sideIndex),
+                node)
 
             return sideValue === otherValue
         }
@@ -827,8 +942,12 @@ function getCaptures(
             var sideCard = node.board[boardIndex]
             var otherCard = cardList[sideCard.card]
 
-            var sideValue = card.sides[sideIndex];
-            var otherValue = otherCard.sides[getOppositeSide(sideIndex)]
+            var sideValue = getAdjustedValue(card, sideIndex, node)
+
+            var otherValue = getAdjustedValue(
+                otherCard,
+                getOppositeSide(sideIndex),
+                node)
 
             return sideValue + otherValue
         }
