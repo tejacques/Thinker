@@ -133,6 +133,7 @@ var tStyles = timerStyles(284, 142)
 
 
 interface HandItemProps {
+    board: Board
     game: Game.Game
     index: number
     player: number
@@ -172,7 +173,7 @@ type ConfigureDragDropRegistration = (s: string, config: {
     }
  }) => void
 
-var DraggableHandItem = React.createClass<HandItemProps, {}>({
+var DraggableDroppableHandItem = React.createClass<HandItemProps, {}>({
     mixins: [DragDropMixin],
     statics: {
         configureDragDrop(register: ConfigureDragDropRegistration) {
@@ -210,6 +211,27 @@ var DraggableHandItem = React.createClass<HandItemProps, {}>({
                             && component.props.game.getPlayerId() === component.props.player
                         return able
                     }
+                },
+
+                dropTarget: {
+                    acceptDrop(
+                        component: React.Component<HandItemProps, any>,
+                        item: { component: React.Component<HandItemProps, any> }) {
+
+                        component.props.board.setState({
+                            game: swapCards(component, item),
+                            preview: null,
+                        })
+                    },
+
+                    canDrop(component: React.Component<HandItemProps, any>) {
+                        var game = component.props.game
+                        var playerId = component.props.player
+                        var droppable = (game.rules & Game.RuleSetFlags.Swp)
+                            && game.getPlayerId() !== playerId
+
+                        return droppable
+                    }
                 }
             });
         },
@@ -223,9 +245,33 @@ var DraggableHandItem = React.createClass<HandItemProps, {}>({
             return null
         }
 
+        var dropState = this.getDropState('HandItem')
+
         var dragProps = this.dragSourceFor('HandItem')
+        var dropProps = this.dropTargetFor('HandItem')
+
         dragProps.onClick = this.props.onClick
-        return React.DOM.span(dragProps,
+
+        var allProps = {}
+        var prop;
+        for (prop in dragProps) {
+            allProps[prop] = dragProps[prop]
+        }
+        for (prop in dropProps) {
+            allProps[prop] = dropProps[prop]
+        }
+
+        var style = this.props.style || {}
+        if (dropState.isHovering) {
+            style.backgroundColor = 'rgba(0, 255, 0, 0.3)'
+        } else if (dropState.isDragging) {
+            style.backgroundColor = 'rgba(0, 0, 255, 0.3)'
+        } else {
+            style.backgroundColor = undefined
+            style.opacity = undefined
+        }
+
+        return React.DOM.span(allProps,
             React.createElement(HandItem, this.props))
     }
 })
@@ -245,6 +291,23 @@ function getNext(
     var boardIndex = component.props.index
     var handIndex = item.component.props.index
     return game.playCard(handIndex, 0, boardIndex)
+}
+
+function swapCards(
+    component: React.Component<HandItemProps, any>,
+    item: { component: React.Component<HandItemProps, any> }) {
+    var game = component.props.board.state.game.clone()
+    var playerHandIndex = item.component.props.index
+    var opponentHandIndex = component.props.index
+    var player = game.getPlayer()
+    var opponent = game.getOtherPlayer()
+
+    var playerCard = player.hand[playerHandIndex]
+    var opponentCard = opponent.hand[opponentHandIndex]
+    player.hand[playerHandIndex] = opponentCard
+    opponent.hand[opponentHandIndex] = playerCard
+
+    return game
 }
 
 var DroppableBoardItem = React.createClass<BoardItemProps, {}>({
@@ -268,7 +331,7 @@ var DroppableBoardItem = React.createClass<BoardItemProps, {}>({
                         var index = component.props.index
                         var droppable = !game.board[index]
 
-                        return !game.board[index]
+                        return droppable
                     },
                     enter(
                         component: React.Component<BoardItemProps, any>,
@@ -424,6 +487,7 @@ class Board extends React.Component<BoardProps, BoardState> {
         })
     }
     render() {
+        window['board'] = this
         var game = this.state.game
         var preview = this.state.preview
         var boardElements: React.ReactElement<any>[] = []
@@ -437,8 +501,9 @@ class Board extends React.Component<BoardProps, BoardState> {
         // are draggable onto the board in an open position
         playerStyles.forEach((playerStyles, player) =>
             playerStyles.forEach((style, index) => boardElements.push(
-                React.createElement<HandItemProps>(DraggableHandItem, {
+                React.createElement<HandItemProps>(DraggableDroppableHandItem, {
                     started: this.state.started,
+                    board: this,
                     game: game,
                     index: index,
                     player: player,

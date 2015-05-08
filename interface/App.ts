@@ -29,4 +29,4 @@ var game = new Game.Game(
 var board = React.createElement(Board, { key: 'board', game: game })
 var root = React.DOM.div({}, board)
 
-React.render(root, appRoot) 
+React.render(root, appRoot)

@@ -109,11 +109,31 @@ var cardTypeStyle: React.CSSProperties = {
     right: 3,
 }
 
-var cardBonusStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 20,
-    left: 10,
+var cardBonusColor = '#55A'
+var positiveShadow = '0px 0px 1px #99D4E6,'
+    + ' 0px 0px 2px #2EABCF,'
+    + ' 0px 0px 3px #2EABCF,'
+    + ' 0px 0px 4px #2EABCF';
+
+var negativeShadow = '0px 0px 1px #E6442B,'
+    + ' 0px 0px 2px #CF3319,'
+    + ' 0px 0px 3px #CF3319,'
+    + ' 0px 0px 4px #CF3319';
+
+function createBonusStyle(positive): React.CSSProperties {
+    return {
+        position: 'absolute',
+        fontFamily: 'Helvetica',
+        top: 50,
+        left: 40,
+        color: 'white',
+        textShadow: positive ? positiveShadow : negativeShadow,
+        fontSize: 20,
+    }
 }
+
+var positiveCardBonusStyle = createBonusStyle(true)
+var negativeCardBonusStyle = createBonusStyle(true)
 
 interface CardProps {
     playerCard: Game.PlayerCard
@@ -195,14 +215,28 @@ class Card extends React.Component<CardProps, void> {
                 }))
 
                 // Type Bonus
-                //var game = this.props.game
-                //var bonus = 0
-                //if (game && (bonus = Game.getCardTypeBonus(card, game))) {
-                //    cardParts.push(React.DOM.span({
-                //        style: cardBonusStyle,
-                //        key: 'type_bonus',
-                //    }, bonus))
-                //}
+                var game = this.props.game
+                var bonus = 0
+                if (game && (bonus = Game.getCardTypeBonus(card, game))) {
+                    cardParts.push(React.DOM.span({
+                        style: (bonus > 0
+                            ? positiveCardBonusStyle
+                            : negativeCardBonusStyle),
+                        key: 'type_bonus',
+                    }, [
+                        React.DOM.span({
+                            style: {
+                                position: 'absolute',
+                            }
+                        }, (bonus > 0 ? '+' : '-')),
+                        React.DOM.span({
+                            style: {
+                                position: 'absolute',
+                                left: 11,
+                            }
+                        }, bonus)
+                    ]))
+                }
             }
         }
 

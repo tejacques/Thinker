@@ -451,7 +451,11 @@ export class Game implements
     }
     isTerminal() {
         return this.turn === 9
-        //return this.board.filter(spot => !spot).length === 0
+            // Game is tied and SD rule is active
+            && !this.isSD()
+    }
+    isSD() {
+        return ((this.rules & RuleSetFlags.SD) && this.value() === 0)
     }
     getMoveIterator() {
         // Can:
@@ -723,6 +727,32 @@ export class Game implements
 
         // Zobrist Hash Change
         // TODO
+
+        // SD Rule
+        if (node.isSD()) {
+            // Cards on board controlled by a player go back to their hand
+            var board = node.board
+            var boardLen = board.length;
+            var playerHandIndexes: [number, number] = [0, 0]
+
+            // TODO: Zobrist hash change while doing this
+            for (var boardIndex = 0; boardIndex < boardLen; boardIndex++) {
+                playerCard = board[boardIndex]
+                var playerId = playerCard.player
+                var hand = node.players[playerCard.player].hand
+                while (hand[playerHandIndexes[playerId]] !== null) {
+                    playerHandIndexes[playerId]++
+                }
+                hand[playerHandIndexes[playerId]] = playerCard.card
+
+                // TODO: Zobrist undo board
+                // TODO: Zobrist do hand
+            }
+
+            node.turn = 0
+            node.firstMove = (node.firstMove+1)%node.players.length
+        }
+
         return node.move
     }
     makeMove(handIndex: number, deckIndex: number, boardIndex: number): GameMove {
