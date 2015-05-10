@@ -293,6 +293,7 @@ export interface GameMove {
     player: number
     card: Card
     captures: BoardCaptures
+    returns?: PlayerCard[][]
 }
 
 var captureIndex = (node: Game, index: number, playerId: number) => {
@@ -660,6 +661,7 @@ export class Game implements
             deck: player.deck,
             card: card,
             captures: {},
+            returns: [Array(5), Array(5)],
         }
 
         // Apply capturing logic here to alter other board playerId
@@ -729,7 +731,7 @@ export class Game implements
         // TODO
 
         // SD Rule
-        if (node.isSD()) {
+        if (node.turn === 9 && node.isSD()) {
             // Cards on board controlled by a player go back to their hand
             var board = node.board
             var boardLen = board.length;
@@ -740,13 +742,19 @@ export class Game implements
                 playerCard = board[boardIndex]
                 var playerId = playerCard.player
                 var hand = node.players[playerCard.player].hand
-                while (hand[playerHandIndexes[playerId]] !== null) {
-                    playerHandIndexes[playerId]++
+                var handIndex = playerHandIndexes[playerId]
+                while (hand[handIndex] !== null) {
+                    handIndex++
                 }
-                hand[playerHandIndexes[playerId]] = playerCard.card
+                playerHandIndexes[playerId] = handIndex
+                node.move.returns[playerId][handIndex] = playerCard
 
                 // TODO: Zobrist undo board
+
+                hand[handIndex] = playerCard.card
+
                 // TODO: Zobrist do hand
+                board[boardIndex] = null
             }
 
             node.turn = 0
@@ -758,7 +766,7 @@ export class Game implements
     makeMove(handIndex: number, deckIndex: number, boardIndex: number): GameMove {
         return Game.playCardStatic(this, handIndex, deckIndex, boardIndex)
     }
-    unamkeMove(move: GameMove) {
+    unmakeMove(move: GameMove) {
         var node = this
 
         // Zobrist Hash Change
@@ -766,6 +774,31 @@ export class Game implements
 
         // Drop turn number
         node.turn--
+
+        if (node.turn < 0) {
+            // SD Rule
+            node.turn = 9
+            var returns = move.returns
+            var returnsLen = returns.length
+            for (var pid = 0; pid < returnsLen; pid++) {
+                var p = node.players[pid]
+                var rets = returns[pid]
+                var hand = p.hand
+                var handLen = hand.length
+                var board = node.board
+                var boardIndex = 0
+                for (var hid = 0; hid < handLen; hid++) {
+                    var playerCard = rets[hid]
+                    if (playerCard !== undefined) {
+                        board[boardIndex++] = playerCard
+                        // Zobrist Hash Change
+                        // TODO
+                    } else {
+                        break
+                    }
+                }
+            }
+        }
 
         // Type Map
         var card = move.card
