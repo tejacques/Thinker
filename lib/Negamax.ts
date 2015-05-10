@@ -64,6 +64,7 @@ function NegaMax<T extends GameNode.GameNode<any>> (
         score = Math.max(score, value)
         alpha = Math.max(alpha, value)
         if (alpha >= beta) {
+            //console.log('cutoff value: alpha: ', alpha, ' beta: ', beta, ' score: ',score)
             break
         }
     }

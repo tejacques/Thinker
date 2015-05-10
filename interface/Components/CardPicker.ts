@@ -76,6 +76,9 @@ class CardPicker extends React.Component<CardPickerProps, CardPickerState> {
             cards: filteredCards.map(cardId => allCards[cardId])
         })
     }
+    componentDidMount() {
+        (<any>React.findDOMNode(this.refs['input'])).focus()
+    }
     render() {
         return React.DOM.div({
             style: {
@@ -95,6 +98,7 @@ class CardPicker extends React.Component<CardPickerProps, CardPickerState> {
                 },
             }, [
                 React.DOM.input({
+                    ref: 'input',
                     key: 'input',
                     style: {
                         margin: '30px auto',

@@ -167,7 +167,7 @@ type ConfigureDragDropRegistration = (s: string, config: {
     }
     dropTarget?: {
         acceptDrop?: (component: any, item: any) => void
-        canDrop?: (component: any) => boolean
+        canDrop?: (component: any, item?: any) => boolean
         enter?: (component: any, item: any) => void
         leave?: (component: any, item: any) => void
     }
@@ -206,10 +206,13 @@ var DraggableDroppableHandItem = React.createClass<HandItemProps, {}>({
                     },
 
                     canDrag(component: React.Component<HandItemProps, any>) {
+                        var swpRule = component.props.game.rules & Game.RuleSetFlags.Swp
+                            && !component.props.started
+
                         var able = component.props.started
                             && !component.props.game.isTerminal()
                             && component.props.game.getPlayerId() === component.props.player
-                        return able
+                        return swpRule || able
                     }
                 },
 
@@ -224,11 +227,14 @@ var DraggableDroppableHandItem = React.createClass<HandItemProps, {}>({
                         })
                     },
 
-                    canDrop(component: React.Component<HandItemProps, any>) {
+                    canDrop(component: React.Component<HandItemProps, any>,
+                        item: { component: React.Component<HandItemProps, any> }) {
                         var game = component.props.game
-                        var playerId = component.props.player
+                        var dragPlayerId = item.component.props.player
+                        var dropPlayerId = component.props.player
                         var droppable = (game.rules & Game.RuleSetFlags.Swp)
-                            && game.getPlayerId() !== playerId
+                            && dragPlayerId !== dropPlayerId
+                            && !component.props.started
 
                         return droppable
                     }
@@ -329,7 +335,8 @@ var DroppableBoardItem = React.createClass<BoardItemProps, {}>({
                     canDrop(component: React.Component<BoardItemProps, any>) {
                         var game = component.props.game
                         var index = component.props.index
-                        var droppable = !game.board[index]
+                        var droppable = component.props.board.state.started
+                            && !game.board[index]
 
                         return droppable
                     },
@@ -462,17 +469,19 @@ class Board extends React.Component<BoardProps, BoardState> {
     }
     openPicker(index: number, player: number) {
         this.pickerClick = card => {
-            var node = this.state.game.clone();
-            var gamePlayer = node.players[player]
+            var node = this.state.game
+            var next = node.clone();
+            next.parent = node
+            var gamePlayer = next.players[player]
             var deck = gamePlayer.deck
-            var hand = node.players[player].hand
+            var hand = next.players[player].hand
             var handId = hand[index]
             hand[index] = card.number
             deck.push(handId)
             ArrayUtils.numericSort(deck, x => x)
-            node.players[player].deck = Game.legalDeckFilter(hand, deck, node.players[player].rarityRestriction)
+            next.players[player].deck = Game.legalDeckFilter(hand, deck, next.players[player].rarityRestriction)
             this.setState({
-                game: node,
+                game: next,
                 picker: {
                     open: false
                 },
@@ -690,17 +699,17 @@ class Board extends React.Component<BoardProps, BoardState> {
                         node = node.parent
                     }
                     node = node.clone()
-                    var player = node.players[1]
-                    player.hand.forEach((cardId, index) => {
-                        player.hand[index] = 0
-                        player.deck.push(cardId)
-                    })
-                    player.deck = Game.legalDeckFilter(
-                        player.hand,
-                        player.deck,
-                        player.rarityRestriction)
+                    //var player = node.players[1]
+                    //player.hand.forEach((cardId, index) => {
+                    //    player.hand[index] = 0
+                    //    player.deck.push(cardId)
+                    //})
+                    //player.deck = Game.legalDeckFilter(
+                    //    player.hand,
+                    //    player.deck,
+                    //    player.rarityRestriction)
 
-                    ArrayUtils.numericSort(player.deck, x => x)
+                    //ArrayUtils.numericSort(player.deck, x => x)
                     this.setState({
                         game: node,
                         started: false,
@@ -741,7 +750,7 @@ class Board extends React.Component<BoardProps, BoardState> {
 
             // Undo Button
             if (this.state.game.parent) {
-                var restartButton = React.DOM.button({
+                var undo = React.DOM.button({
                     key: 'undo_button',
                     style: {
                         display: 'block',
@@ -763,13 +772,14 @@ class Board extends React.Component<BoardProps, BoardState> {
                     }
                 }, 'Undo')
 
-                boardElements.push(restartButton)
+                boardElements.push(undo)
             }
         }
 
         // Picker
         if (this.state.picker.open) {
             var cardPicker = React.createElement<{}>(CardPicker, {
+                ref: 'cardPicker',
                 key: 'cardPicker',
                 cards: this.state.picker.cards,
                 onPicked: (picked) => this.pickerClick(picked),

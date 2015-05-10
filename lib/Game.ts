@@ -420,17 +420,19 @@ export class Game implements
         var exposedSidesWeight = -5
         var exposedValuesWeight = 5
 
+        var cc = cardsControlledWeight *
+            (cardsControlled[0] - cardsControlled[1])
+
+        var es = exposedSidesWeight * (exposedSides[0] - exposedSides[1])
+
         var ev = exposedValuesWeight * (
             (exposedValues[0] ? (exposedValues[0] / exposedSides[0]) : 0) -
             (exposedValues[1] ? (exposedValues[1] / exposedSides[1]) : 0)
             )
 
-        this._value = cardsControlledWeight * (cardsControlled[0] - cardsControlled[1]) +
-            exposedSidesWeight * (exposedSides[0] - exposedSides[1]) +
-            exposedValuesWeight * (
-                (exposedValues[0] ? (exposedValues[0] / exposedSides[0]) : 0) -
-                (exposedValues[1] ? (exposedValues[1] / exposedSides[1]) : 0)
-            )
+        this._value = cc
+            + es
+            //+ ev
 
         return this._value
     }
@@ -476,6 +478,9 @@ export class Game implements
 
         // Valid hand indexes are any non nulls
         var handIndexes = getIndexes(player.hand, item => item !== null)
+        var handLen = (this.rules & RuleSetFlags.Ord)
+            ? 1
+            : handIndexes.length
         // Valid deck indexes are any
         var deckIndexes = range(player.deck.length)
         // Valid board indexes are nulls (unplayed positions)
@@ -484,7 +489,7 @@ export class Game implements
 
         var iterator = {
             getNext: () => {
-                if (handIndex < handIndexes.length) {
+                if (handIndex < handLen) {
                     var handIdx = handIndexes[handIndex]
                     var deckIdx = deckIndexes[deckIndex]
                     var boardIdx = boardIndexes[boardIndex]
@@ -548,6 +553,7 @@ export class Game implements
         var boardIndexes = getIndexes(this.board, item => !item)
         var boardIndex = 0
         var moves: Game[] = []
+        var ord = (this.rules & RuleSetFlags.Ord) > 0
 
         // Valid hand indexes are values greater than 0 and not null
         for (handIndex = 0; handIndex < handLen; handIndex++) {
@@ -562,6 +568,9 @@ export class Game implements
                     0,
                     boardIdx)
                 moves.push(node)
+            }
+            if (ord) {
+                return moves
             }
         }
 
@@ -583,10 +592,14 @@ export class Game implements
         var moves: Game[] = []
 
         var hasFaceDownCard = false
+        var ord = (this.rules & RuleSetFlags.Ord) > 0
+
         for(handIndex = 0; handIndex < handLen; handIndex++) {
             var cardId = player.hand[handIndex]
             if (cardId === 0) {
                 hasFaceDownCard = true
+                break
+            } else if (ord) {
                 break
             }
         }

@@ -133,7 +133,7 @@ function createBonusStyle(positive): React.CSSProperties {
 }
 
 var positiveCardBonusStyle = createBonusStyle(true)
-var negativeCardBonusStyle = createBonusStyle(true)
+var negativeCardBonusStyle = createBonusStyle(false)
 
 interface CardProps {
     playerCard: Game.PlayerCard
@@ -234,7 +234,7 @@ class Card extends React.Component<CardProps, void> {
                                 position: 'absolute',
                                 left: 11,
                             }
-                        }, bonus)
+                        }, Math.abs(bonus))
                     ]))
                 }
             }

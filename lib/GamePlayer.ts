@@ -248,7 +248,8 @@ export var players: GamePlayer[] = [
     {
         number: 19,
         name: 'QnVzY2Fycm9u',
-        deck: [39, 42, 43, 48, 52, 66],
+        hand: [66, 52, 43, 0, 0],
+        deck: [39, 42, 43, 44, 48, 52, 66],
         reward: [44, 48],
         win: 59,
         lose: 8,
@@ -272,7 +273,8 @@ export var players: GamePlayer[] = [
     {
         number: 21,
         name: 'RnVmdWx1cGE=',
-        deck: [13, 19, 20, 28, 33, 46, 67],
+        hand: [33, 28, 2, 0, 0], // Biggs, Momo, Ton
+        deck: [2, 13, 19, 20, 28, 33, 46, 67],
         reward: [46],
         win: 48,
         lose: 7,
@@ -284,7 +286,8 @@ export var players: GamePlayer[] = [
     {
         number: 22,
         name: 'Um9nZXI=',
-        deck: [13, 15, 26, 5, 6, 9],
+        hand: [26, 9, 13, 0, 0],
+        deck: [13, 15, 26, 5, 6, 9, 25],
         reward: [5, 9],
         win: 22,
         lose: 3,
@@ -296,7 +299,8 @@ export var players: GamePlayer[] = [
     {
         number: 23,
         name: 'Ridob2JoYXM=',
-        deck: [14, 23, 25, 34, 36, 45, 5, 6],
+        hand: [45, 36, 14, 0, 0],
+        deck: [14, 23, 25, 34, 36, 45, 5, 6, 13, 18],
         reward: [36],
         win: 33,
         lose: 4,
