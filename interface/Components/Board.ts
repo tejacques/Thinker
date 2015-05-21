@@ -151,7 +151,7 @@ class HandItem extends React.Component<HandItemProps, void> {
             style: style,
         },
             React.createElement(Card, {
-                playerCard: new Game.PlayerCard(
+                playerCard: Game.CreatePlayerCard(
                     game.players[player].hand[index],
                     player),
                 game: game,
@@ -336,7 +336,7 @@ var DroppableBoardItem = React.createClass<BoardItemProps, {}>({
                         var game = component.props.game
                         var index = component.props.index
                         var droppable = component.props.board.state.started
-                            && !game.board[index]
+                            && game.board[index] === 0xFF
 
                         return droppable
                     },

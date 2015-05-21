@@ -25,10 +25,10 @@ imagePath[ImageType.Type] = 'type/'
 
 var pad = Utils.pad
 
-function cardBgSrc(playercard: Game.PlayerCard) {
+function cardBgSrc(playercard: number) {
     return imageBase
         + imagePath[ImageType.Background]
-        + playercard.player
+        + Game.GetPlayer(playercard)
         + imageExtension
 }
 
@@ -136,26 +136,22 @@ var positiveCardBonusStyle = createBonusStyle(true)
 var negativeCardBonusStyle = createBonusStyle(false)
 
 interface CardProps {
-    playerCard: Game.PlayerCard
+    playerCard: number
     game?: Game.Game
 }
 
 class Card extends React.Component<CardProps, void> {
     render() {
         var playerCard = this.props.playerCard
-        var noCard = (!playerCard
-            || (playerCard.card === null)
-            || (typeof playerCard.card === 'undefined')
-            || (playerCard.card & 0x7F) === 0x7F)
+        var noCard = playerCard === 0xFF
 
         if (noCard) {
             return null
         }
 
-        var noPlayer = (null === playerCard.player)
-            || (typeof playerCard.player === 'undefined')
+        var noPlayer = !Game.HasPlayer(playerCard)
 
-        var card = GameCard.cardList[playerCard.card]
+        var card = GameCard.cardList[Game.GetCardId(playerCard)]
         var cardParts: React.ReactElement<any>[] = []
 
         // Background

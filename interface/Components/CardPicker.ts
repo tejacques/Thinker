@@ -15,9 +15,9 @@ interface CardPickerProps {
 interface CardPickerState {
 }
 
-import PlayerCard = Game.PlayerCard
+type PlayerCard = number
 var cardList = GameCard.cardList
-var allCards: React.ReactElement<{ playerCard: PlayerCard }>[] = Range(0, 80).map(card => React.createElement(Card, { playerCard: new PlayerCard(card, null) }))
+var allCards: React.ReactElement<{ playerCard: PlayerCard }>[] = Range(0, 80).map(card => React.createElement(Card, { playerCard: Game.CreatePlayerCard(card, 0xFF) }))
 
 var sideMap = {
     't': 0,
@@ -110,7 +110,7 @@ class CardPicker extends React.Component<CardPickerProps, CardPickerState> {
                     onClick: (e) => e.stopPropagation(),
                     onKeyDown: (e) => {
                         if (e.keyCode == 13) {
-                            this.props.onPicked(cardList[this.state.cards[0].props.playerCard.card])
+                            this.props.onPicked(cardList[Game.GetCardId(this.state.cards[0].props.playerCard)])
                         }
                     }
                 }),
@@ -118,7 +118,7 @@ class CardPicker extends React.Component<CardPickerProps, CardPickerState> {
                     key: 'picker',
                     choices: this.state.cards,
                     onPicked: (component: React.ReactElement<{ playerCard: PlayerCard }>) => {
-                        this.props.onPicked(cardList[component.props.playerCard.card])
+                        this.props.onPicked(cardList[Game.GetCardId(component.props.playerCard)])
                     },
                     style: {
                         listStyleType: 'none',

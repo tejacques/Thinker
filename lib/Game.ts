@@ -6,24 +6,30 @@ export var cardList = GameCard.cardList
 export var cardIds = range(1, 80)
 type Card = GameCard.Card
 
-export class PlayerCard {
-    card: number
-    player: number
-    constructor(card: number, player: number) {
-        this.card = card
-        this.player = player
-    }
-    clone() {
-        return new PlayerCard(this.card, this.player)
-    }
+export function CreatePlayerCard(card: number, player: number) {
+    return card === 0xFF ? 0xFF : ((card & 0x7F) | (player|0) << 7)
 }
 
-type Board = PlayerCard[]
+export function HasPlayer(boardCard: number) {
+    return GetPlayer(boardCard) < 2
+}
+
+export function GetPlayer(boardCard: number) {
+    return boardCard >> 7
+}
+
+export function GetCardId(boardCard: number) {
+    return boardCard & 0x7F
+}
+
+type PlayerCard = number
+
+type Board = number[]
 
 var emptyBoard: Board = [
-    null, null, null,
-    null, null, null,
-    null, null, null
+    0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF
 ]
 
 export function newBoard() {
@@ -46,13 +52,86 @@ export function getRandomHand(deck: Deck, rarityRestriction: number) {
     return hand
 }
 
-var rarityIdMap: { [key: number] : number; default: number } = {
-    2: 20,
-    3: 36,
-    4: 50,
-    5: 60,
-    6: Infinity,
-    default: Infinity,
+var rarityIdMap: number[] = [
+    0,  // 0
+    0,  // 1
+    20, // 2
+    36, // 3
+    50, // 4
+    60  // 5
+]
+
+var rarityIdMapDefault = 80
+
+export function UpdateDeckMove(
+    node: Game,
+    move: GameMove
+) {
+    var player = node.getPlayer()
+    var cardId = move.card.number
+    var fromDeck = cardId === move.deckId
+    var deck = player.deck
+    deck[cardId] = 0
+    var deckInfo = player.deckInfo
+    
+    if (fromDeck && player.deckInfo.lowest === cardId) {
+        while(deck[deckInfo.lowest] === 0) {
+            player.deckInfo.lowest++
+        }
+    }
+    var rarityIndex = rarityIdMap[player.rarityRestriction] || rarityIdMapDefault
+    var max = rarityIdMapDefault // all card OK
+    if (cardId > rarityIndex) {
+        max = rarityIndex
+    }
+    var newMax = Math.min(player.deckInfo.highest, max)
+    if (player.deckInfo.highest > newMax) {
+        player.deckInfo.highest = newMax
+    }
+    
+    if (fromDeck && player.deckInfo.highest === cardId) {
+        while(deck[deckInfo.highest] === 0) {
+            player.deckInfo.highest--
+        }
+    }
+    
+    // Set move info
+    move.deckLowest = player.deckInfo.lowest
+    move.deckHighest = player.deckInfo.highest
+}
+
+export function ApplyDeckMove(
+    node: Game,
+    move: GameMove
+) {
+    var player = node.getPlayer()
+    var deck = player.deck
+    var cardId = move.card.number
+    var fromDeck = move.deckId > 0
+    
+    player.deckInfo.lowest = move.deckLowest
+    player.deckInfo.highest = move.deckHighest
+    
+    if (fromDeck) {
+        deck[cardId] = 0
+    }
+}
+
+export function UnApplyDeckMove(
+    node: Game,
+    move: GameMove
+) {
+    var player = node.getPlayer()
+    var deck = player.deck
+    var cardId = move.card.number
+    var fromDeck = move.deckId > 0
+    
+    player.deckInfo.lowest = move.lastDeckLowest
+    player.deckInfo.highest = move.lastDeckHighest
+    
+    if (fromDeck) {
+        deck[cardId] = cardId
+    }
 }
 
 export function legalDeckFilter(
@@ -72,17 +151,28 @@ export function legalDeckFilter(
         }
     }
 
-    var rarityThresholdId = rarityIdMap[rarityRestriction] || rarityIdMap.default
+    var rarityThresholdId = rarityIdMap[rarityRestriction] || rarityIdMapDefault
     var hasRareCard = maxCardId > rarityThresholdId
 
 
     var deckLen = deck.length
-    var newDeck: number[] = []
+    var newDeckLen = 0
     for (i = 0; i < deckLen; i++) {
         var deckId = deck[i];
         if (deckId && !(deckId in handDict)) {
             if (!hasRareCard || deckId <= rarityThresholdId) {
-                newDeck.push(deckId)
+                newDeckLen++
+            }
+        }
+    }
+
+    var newDeck: number[] = new Array(newDeckLen)
+    var newDeckIndex = 0
+    for (i = 0; i < deckLen; i++) {
+        var deckId = deck[i];
+        if (deckId && !(deckId in handDict)) {
+            if (!hasRareCard || deckId <= rarityThresholdId) {
+                newDeck[newDeckIndex++] = deckId
             }
         }
     }
@@ -95,11 +185,17 @@ export class Player {
     deck: number[]
     rarityRestriction: number
     numFaceDownCards: number
+    deckInfo: {
+        lowest: number
+        highest: number
+    }
     constructor(
         hand: number[],
         deck: number[],
         rarityRestriction: number = 4,
-        numFaceDownCards?: number) {
+        numFaceDownCards?: number,
+        lowest: number = 0,
+        highest: number = 80) {
         this.hand = hand.slice()
         this.rarityRestriction = rarityRestriction
         this.deck = legalDeckFilter(hand, deck, this.rarityRestriction)
@@ -115,13 +211,19 @@ export class Player {
                 }
             }
         }
+        this.deckInfo = {
+            lowest: lowest,
+            highest: highest,
+        }
     }
     clone() {
         return new Player(
             this.hand,
             this.deck,
             this.rarityRestriction,
-            this.numFaceDownCards)
+            this.numFaceDownCards,
+            this.deckInfo.lowest,
+            this.deckInfo.highest)
     }
 }
 
@@ -293,11 +395,15 @@ export interface GameMove {
     player: number
     card: Card
     captures: BoardCaptures
+    deckLowest: number,
+    deckHighest: number,
+    lastDeckLowest: number
+    lastDeckHighest: number
     returns?: PlayerCard[][]
 }
 
 var captureIndex = (node: Game, index: number, playerId: number) => {
-    node.board[index].player = playerId
+    node.board[index] = CreatePlayerCard(node.board[index], playerId)
 }
 
 export class Game implements
@@ -325,7 +431,7 @@ export class Game implements
         parent?: Game,
         bonus?: number[]
         ) {
-        this.board = board.map((card) => card? card.clone() : null)
+        this.board = board.slice()
         this.players = players.map((player) => player.clone())
         this.turn = turn;
         this.firstMove = firstMove
@@ -371,8 +477,10 @@ export class Game implements
 
         for (var boardIndex = 0; boardIndex < this.board.length; boardIndex++) {
             var playerCard = this.board[boardIndex]
-            if (playerCard) {
-                cardsControlled[playerCard.player]++
+            var cardId = GetCardId(playerCard)
+            var playerId = GetPlayer(playerCard)
+            if (cardId) {
+                cardsControlled[playerId]++
 
                 var x = boardIndex % 3
                 var y = (boardIndex / 3) | 0
@@ -382,27 +490,27 @@ export class Game implements
                 var leftIndex = boardIndex - 1
 
                 var boardIndexes: number[][] = []
-                var card = cardList[playerCard.card]
+                var card = cardList[cardId]
 
                 if (y > 0 && !this.board[upIndex]) {
                     // Up
-                    exposedSides[playerCard.player]++
-                    exposedValues[playerCard.player] += card.sides[0]
+                    exposedSides[playerId]++
+                    exposedValues[playerId] += card.sides[0]
                 }
                 if (x < 2 && !this.board[rightIndex]) {
                     // Right
-                    exposedSides[playerCard.player]++
-                    exposedValues[playerCard.player] += card.sides[1]
+                    exposedSides[playerId]++
+                    exposedValues[playerId] += card.sides[1]
                 }
                 if (y < 2 && !this.board[downIndex]) {
                     // Down
-                    exposedSides[playerCard.player]++
-                    exposedValues[playerCard.player] += card.sides[2]
+                    exposedSides[playerId]++
+                    exposedValues[playerId] += card.sides[2]
                 }
                 if (x > 0 && !this.board[leftIndex]) {
                     // Left
-                    exposedSides[playerCard.player]++
-                    exposedValues[playerCard.player] += card.sides[3]
+                    exposedSides[playerId]++
+                    exposedValues[playerId] += card.sides[3]
                 }
             }
         }
@@ -410,7 +518,7 @@ export class Game implements
         for (var playerId = 0; playerId < this.players.length; playerId++) {
             var hand = this.players[playerId].hand
             for (var handIndex = 0; handIndex < hand.length; handIndex++) {
-                if (null !== hand[handIndex]) {
+                if (0xFF !== hand[handIndex]) {
                     cardsControlled[playerId]++
                 }
             }
@@ -440,12 +548,13 @@ export class Game implements
         var val = 0;
         this.board.forEach((card) => {
             if (card) {
-                if (card.player === playerId) val++
+                var cardPlayerId = GetPlayer(card)
+                if (cardPlayerId === playerId) val++
             }
         })
 
         this.players[playerId].hand.forEach(card => {
-            if (card !== null) {
+            if (card !== 0xFF) {
                 val++
             }
         })
@@ -476,15 +585,15 @@ export class Game implements
         var deckIndex = 0
         var boardIndex = 0
 
-        // Valid hand indexes are any non nulls
-        var handIndexes = getIndexes(player.hand, item => item !== null)
+        // Valid hand indexes are any non 0xFF value
+        var handIndexes = getIndexes(player.hand, item => item !== 0xFF)
         var handLen = (this.rules & RuleSetFlags.Ord)
             ? 1
             : handIndexes.length
         // Valid deck indexes are any
         var deckIndexes = range(player.deck.length)
-        // Valid board indexes are nulls (unplayed positions)
-        var boardIndexes = getIndexes(this.board, item => !item)
+        // Valid board indexes are 0xFF (unplayed positions)
+        var boardIndexes = getIndexes(this.board, item => item === 0xFF)
         var lookedThroughDeck = false;
 
         var iterator = {
@@ -549,16 +658,16 @@ export class Game implements
         var index = 0
         var handIndex = 0
         var handLen = player.hand.length
-        // Valid board indexes are nulls (unplayed positions)
-        var boardIndexes = getIndexes(this.board, item => !item)
+        // Valid board indexes are values of 0xFF (unplayed positions)
+        var boardIndexes = getIndexes(this.board, item => item === 0xFF)
         var boardIndex = 0
         var moves: Game[] = []
         var ord = (this.rules & RuleSetFlags.Ord) > 0
 
-        // Valid hand indexes are values greater than 0 and not null
+        // Valid hand indexes are values greater than 0 and not 0xFF
         for (handIndex = 0; handIndex < handLen; handIndex++) {
             var cardId = player.hand[handIndex]
-            if (!cardId) {
+            if (0 === cardId || 0xFF === cardId) {
                 continue
             }
             for (boardIndex = 0; boardIndex < boardIndexes.length; boardIndex++) {
@@ -586,8 +695,8 @@ export class Game implements
         var handLen = player.hand.length
         var deckIndex = 0
         var deckLen = player.hand.length
-        // Valid board indexes are nulls (unplayed positions)
-        var boardIndexes = getIndexes(this.board, item => !item)
+        // Valid board indexes are 0xFF (unplayed positions)
+        var boardIndexes = getIndexes(this.board, item => item === 0xFF)
         var boardIndex = 0
         var moves: Game[] = []
 
@@ -604,7 +713,7 @@ export class Game implements
             }
         }
 
-        // Valid hand indexes are values greater than 0 and not null
+        // Valid hand indexes are values greater than 0 and not 0xFF
         for (boardIndex = 0; hasFaceDownCard && boardIndex < boardIndexes.length; boardIndex++) {
             var boardIdx = boardIndexes[boardIndex]
             for (deckIndex = 0; deckIndex < deckLen; deckIndex++) {
@@ -646,23 +755,6 @@ export class Game implements
         var cardId = handId || deckId
         var card = cardList[cardId]
 
-        if (handId === 0) {
-            player.numFaceDownCards--
-        }
-
-        // Remove card from player's deck, as well as any card that break the rarity rule
-        if (player.deck.length) {
-            if (handId === 0) {
-                player.hand[handIndex] = cardId
-            }
-            player.deck = legalDeckFilter(player.hand, player.deck, player.rarityRestriction)
-        }
-        // Place the card on the board
-        var playerCard = node.board[boardIndex] = new PlayerCard(cardId, playerId)
-
-        // Remove card from player's hand. A value of null means that card has been played
-        player.hand[handIndex] = null
-
         // Set the move
         node.move = {
             boardIndex: boardIndex,
@@ -674,8 +766,36 @@ export class Game implements
             deck: player.deck,
             card: card,
             captures: {},
-            returns: [Array(5), Array(5)],
+            deckLowest: player.deckInfo.lowest,
+            deckHighest: player.deckInfo.highest,
+            lastDeckLowest: player.deckInfo.lowest,
+            lastDeckHighest: player.deckInfo.highest,
+            returns: [],
         }
+        
+        if (handId === 0) {
+            player.numFaceDownCards--
+        }
+
+        // Remove card from player's deck, as well as any card that break the rarity rule
+        // TODO: Remove this in favor of other method
+        if (player.deck.length) {
+            if (handId === 0) {
+                player.hand[handIndex] = cardId
+            }
+            player.deck = legalDeckFilter(player.hand, player.deck, player.rarityRestriction)
+        }
+        
+        // Update move with new deck info
+        if (player.deck) {
+            UpdateDeckMove(node, node.move)
+        }
+        
+        // Place the card on the board
+        var playerCard = node.board[boardIndex] = CreatePlayerCard(cardId, playerId)
+
+        // Remove card from player's hand. A value of 0xFF means that card has been played
+        player.hand[handIndex] = 0xFF
 
         // Apply capturing logic here to alter other board playerId
         // node.board ...
@@ -683,7 +803,7 @@ export class Game implements
         var com = false;
 
         var captureIndex = (node: Game, index: number, playerId: number) => {
-            node.board[index].player = playerId
+            node.board[index] = CreatePlayerCard(GetCardId(node.board[index]), playerId)
         }
 
         // Propogate as necessary
@@ -745,6 +865,10 @@ export class Game implements
 
         // SD Rule
         if (node.turn === 9 && node.isSD()) {
+            node.move.returns = [
+                [0xFF, 0xFF, 0xFF, 0xFF, 0xFF],
+                [0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+            ]
             // Cards on board controlled by a player go back to their hand
             var board = node.board
             var boardLen = board.length;
@@ -753,21 +877,23 @@ export class Game implements
             // TODO: Zobrist hash change while doing this
             for (var boardIndex = 0; boardIndex < boardLen; boardIndex++) {
                 playerCard = board[boardIndex]
-                var playerId = playerCard.player
-                var hand = node.players[playerCard.player].hand
+                var playerId = GetPlayer(playerCard)
+                var cardId = GetCardId(playerCard)
+                var hand = node.players[playerId].hand
                 var handIndex = playerHandIndexes[playerId]
-                while (hand[handIndex] !== null) {
+                while (hand[handIndex] !== 0xFF) {
                     handIndex++
                 }
                 playerHandIndexes[playerId] = handIndex
-                node.move.returns[playerId][handIndex] = playerCard
+                node.move.returns[playerId][handIndex] = boardIndex
 
                 // TODO: Zobrist undo board
 
-                hand[handIndex] = playerCard.card
+                hand[handIndex] = cardId
 
                 // TODO: Zobrist do hand
-                board[boardIndex] = null
+                // Set to 0xFF to denote nothing is there
+                board[boardIndex] = 0xFF
             }
 
             node.turn = 0
@@ -779,7 +905,70 @@ export class Game implements
     makeMove(handIndex: number, deckIndex: number, boardIndex: number): GameMove {
         return Game.playCardStatic(this, handIndex, deckIndex, boardIndex)
     }
-    unmakeMove(move: GameMove) {
+    applyMove(move: GameMove) {
+        var node = this
+        
+        // Update the player's deck
+        ApplyDeckMove(node, move)
+        
+        var playerId = node.getPlayerId()
+        var player = node.players[playerId]
+        var otherPlayerId = node.getOtherPlayerId()
+        
+        // Capture the positions
+        for (var rule in node.move.captures) {
+            var ruleCaptures = node.move.captures[rule]
+            ruleCaptures.forEach(captureLevel =>
+                captureLevel.forEach(index =>
+                    captureIndex(node, index, playerId)))
+        }
+
+        // Bump number of face down cards, if necessary
+        if (move.handId === 0) {
+            player.numFaceDownCards--
+        }
+        
+        // Type Map
+        var card = move.card
+        if (card.type) {
+            if (node.rules & RuleSetFlags.Asc) {
+                node.bonus[card.type]++
+            } else if (node.rules & RuleSetFlags.Des) {
+                node.bonus[card.type]--
+            }
+        }
+        
+        // SD Rule
+        if (node.turn == 9 && node.isSD()) {
+            // Cards on board controlled by a player go back to their hand
+            var board = node.board
+            var boardLen = board.length;
+            var playerHandIndexes: [number, number] = [0, 0]
+
+            // TODO: Zobrist hash change while doing this
+            for (var boardIndex = 0; boardIndex < boardLen; boardIndex++) {
+                var playerCard = board[boardIndex]
+                var playerId = GetPlayer(playerCard)
+                var cardId = GetCardId(playerCard)
+                var hand = node.players[playerId].hand
+                var handIndex = playerHandIndexes[playerId]
+                while (hand[handIndex] !== 0xFF) {
+                    handIndex++
+                }
+                playerHandIndexes[playerId] = handIndex
+
+                // TODO: Zobrist undo board
+
+                hand[handIndex] = cardId
+
+                // TODO: Zobrist do hand
+                // Set to 0xFF to denote nothing is there
+                board[boardIndex] = 0xFF
+            }
+            node.turn = 0
+        }
+    }
+    unApplyMove(move: GameMove) {
         var node = this
 
         // Zobrist Hash Change
@@ -799,16 +988,15 @@ export class Game implements
                 var hand = p.hand
                 var handLen = hand.length
                 var board = node.board
-                var boardIndex = 0
                 for (var hid = 0; hid < handLen; hid++) {
-                    var playerCard = rets[hid]
-                    if (playerCard !== undefined) {
-                        board[boardIndex++] = playerCard
-                        // Zobrist Hash Change
-                        // TODO
-                    } else {
-                        break
+                    var boardIndex = rets[pid][hid]
+                    if (boardIndex === 0xFF) {
+                        continue
                     }
+                    var playerCard = CreatePlayerCard(hand[hid], pid)
+                    board[boardIndex] = playerCard
+                    // Zobrist Hash Change
+                    // TODO
                 }
             }
         }
@@ -839,6 +1027,9 @@ export class Game implements
         if (move.handId === 0) {
             player.numFaceDownCards++
         }
+        
+        // Update the player's deck
+        UnApplyDeckMove(node, move)
     }
     
     toString() {
@@ -914,6 +1105,9 @@ function getCaptures(
     if (!playerCard) {
         return capturedIndexes
     }
+    
+    var playerId = GetPlayer(playerCard)
+    var cardId = GetCardId(playerCard)
 
     var x = index % 3
     var y = (index / 3) | 0
@@ -931,16 +1125,17 @@ function getCaptures(
 
     // filter to only the valid board positions
     var validBoardIndexes = boardIndexes
-        .filter(indexes => !!node.board[indexes[0]])
+        .filter(indexes => node.board[indexes[0]] !== 0xFF)
 
     // Only capture if the card is present and the player is different
     var filterOtherPlayer = (indexes: number[]) => {
         var boardIndex = indexes[0]
-        return node.board[boardIndex].player !== playerCard.player
+        var boardIndexPlayerId = GetPlayer(node.board[boardIndex])
+        return boardIndexPlayerId !== playerId
     }
     var filteredBoardIndexes = validBoardIndexes.filter(filterOtherPlayer)
 
-    var card = cardList[playerCard.card]
+    var card = cardList[cardId]
 
     // Basic rule
     var basicCaptures: number[] = []
@@ -951,7 +1146,8 @@ function getCaptures(
 
         // Get the side Index
         var sideCard = node.board[boardIndex]
-        var otherCard = cardList[sideCard.card]
+        var sideCardId = GetCardId(sideCard)
+        var otherCard = cardList[sideCardId]
 
         var sideValue = getAdjustedValue(card, sideIndex, node)
 
@@ -985,7 +1181,8 @@ function getCaptures(
             var sideIndex = indexes[1]
 
             var sideCard = node.board[boardIndex]
-            var otherCard = cardList[sideCard.card]
+            var sideCardId = GetCardId(sideCard)
+            var otherCard = cardList[sideCardId]
 
             var sideValue = getAdjustedValue(card, sideIndex, node)
 
@@ -1016,7 +1213,8 @@ function getCaptures(
             var sideIndex = indexes[1]
 
             var sideCard = node.board[boardIndex]
-            var otherCard = cardList[sideCard.card]
+            var sideCardId = GetCardId(sideCard)
+            var otherCard = cardList[sideCardId]
 
             var sideValue = getAdjustedValue(card, sideIndex, node)
 

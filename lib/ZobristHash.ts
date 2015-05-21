@@ -12,9 +12,9 @@ class ZobristHash{
         this.lowBits = new Array(256)
         this.highBits = new Array(256)
         for (var i = 0; i < 256; i++) {
-            this.lowBits[i] = new Array(81)
-            this.highBits[i] = new Array(81)
-            for (var j = 0; j < 81; j++) {
+            this.lowBits[i] = new Array(256)
+            this.highBits[i] = new Array(256)
+            for (var j = 0; j < 256; j++) {
                 this.lowBits[i][j] = this.generator.next(32)
                 this.highBits[i][j] = this.generator.next(32)
             }
@@ -34,26 +34,43 @@ class ZobristHash{
             boardIndex++ , bitIndex++) {
             var playerCard = node.board[boardIndex]
             if (playerCard) {
-                this.low ^= this.lowBits[bitIndex][playerCard.card]
+                this.low ^= this.lowBits[bitIndex][playerCard]
             }
         }
 
         // Player Hands
         for (var playerId = 0;
             playerId < node.players.length;
-            playerId++ , bitIndex++) {
+            playerId++) {
             var player = node.players[playerId]
             var hand = player.hand
             var handLen = hand.length
-            for (var handIndex = 0; handIndex < handLen; handIndex++) {
+            for (var handIndex = 0; handIndex < handLen;
+                handIndex++,
+                bitIndex++) {
                 var handId = hand[handIndex]
-                if (handId !== null) {
-                    this.low ^= hand[handIndex]
+                if (handId !== 0xFF) {
+                    this.low ^= this.lowBits[bitIndex][handId]
                 }
             }
         }
 
         // Player Decks
+        // Player Hands
+        for (var playerId = 0;
+            playerId < node.players.length;
+            playerId++ , bitIndex++) {
+            var player = node.players[playerId]
+            var deck = player.deck
+            var deckLen = deck.length
+            for (var deckIndex = 0; deckIndex < deckLen;
+                deckIndex++, bitIndex++) {
+                var deckId = deck[deckIndex]
+                if (deckId !== 0) {
+                    this.low ^= this.lowBits[bitIndex][deckId]
+                }
+            }
+        }
     }
 }
 
