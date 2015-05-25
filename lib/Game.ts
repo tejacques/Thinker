@@ -395,8 +395,8 @@ export interface GameMove {
     player: number
     card: Card
     captures: BoardCaptures
-    deckLowest: number,
-    deckHighest: number,
+    deckLowest: number
+    deckHighest: number
     lastDeckLowest: number
     lastDeckHighest: number
     returns?: PlayerCard[][]

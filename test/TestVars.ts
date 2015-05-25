@@ -1,34 +1,34 @@
 ﻿import Game = require('../lib/Game')
 export var TestBoard = [
     [
-        null,                      new Game.PlayerCard(1, 1), new Game.PlayerCard(1, 1),
-        new Game.PlayerCard(1, 1), new Game.PlayerCard(1, 0), new Game.PlayerCard(1, 1),
-        new Game.PlayerCard(1, 0), new Game.PlayerCard(1, 0), new Game.PlayerCard(1, 1)
+        null,                        Game.CreatePlayerCard(1, 1), Game.CreatePlayerCard(1, 1),
+        Game.CreatePlayerCard(1, 1), Game.CreatePlayerCard(1, 0), Game.CreatePlayerCard(1, 1),
+        Game.CreatePlayerCard(1, 0), Game.CreatePlayerCard(1, 0), Game.CreatePlayerCard(1, 1)
     ],
     [
-        null,                      null,                      new Game.PlayerCard(1, 1),
-        null,                      new Game.PlayerCard(1, 1), new Game.PlayerCard(1, 1),
-        new Game.PlayerCard(1, 1), new Game.PlayerCard(1, 0), new Game.PlayerCard(1, 1)
+        null,                        null,                        Game.CreatePlayerCard(1, 1),
+        null,                        Game.CreatePlayerCard(1, 1), Game.CreatePlayerCard(1, 1),
+        Game.CreatePlayerCard(1, 1), Game.CreatePlayerCard(1, 0), Game.CreatePlayerCard(1, 1)
     ],
     [
-        null,                      null,                      new Game.PlayerCard(1, 1),
-        new Game.PlayerCard(1, 1), new Game.PlayerCard(1, 1), new Game.PlayerCard(1, 1),
-        new Game.PlayerCard(1, 1), new Game.PlayerCard(1, 0), new Game.PlayerCard(1, 1)
+        null,                        null,                        Game.CreatePlayerCard(1, 1),
+        Game.CreatePlayerCard(1, 1), Game.CreatePlayerCard(1, 1), Game.CreatePlayerCard(1, 1),
+        Game.CreatePlayerCard(1, 1), Game.CreatePlayerCard(1, 0), Game.CreatePlayerCard(1, 1)
     ],
     [
-        null,                      new Game.PlayerCard(2, 0), null,
-        new Game.PlayerCard(1, 0), null,                      new Game.PlayerCard(1, 1),
-        null,                      new Game.PlayerCard(2, 1), null
+        null,                        Game.CreatePlayerCard(2, 0), null,
+        Game.CreatePlayerCard(1, 0), null,                        Game.CreatePlayerCard(1, 1),
+        null,                        Game.CreatePlayerCard(2, 1), null
     ],
     [
-        null,                      null,                      null,
-        new Game.PlayerCard(1, 0), null,                      new Game.PlayerCard(1, 1),
-        null,                      new Game.PlayerCard(2, 1), null
+        null,                        null,                        null,
+        Game.CreatePlayerCard(1, 0), null,                        Game.CreatePlayerCard(1, 1),
+        null,                        Game.CreatePlayerCard(2, 1), null
     ],
     [
-        null,                      null,                      null,
-        new Game.PlayerCard(1, 0), null,                      new Game.PlayerCard(1, 1),
-        null,                      null,                      null
+        null,                        null,                      null,
+        Game.CreatePlayerCard(1, 0), null,                      Game.CreatePlayerCard(1, 1),
+        null,                        null,                      null
     ]
 ]
 

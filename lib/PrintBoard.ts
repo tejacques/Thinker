@@ -1,7 +1,7 @@
 ﻿import chalk = require('chalk')
 import game = require('./Game')
 import GameCard = require('./GameCard')
-type Board = game.PlayerCard[]
+type Board = number[]
 var cardList = GameCard.cardList
 
 var playerColor = {
@@ -34,8 +34,8 @@ function printBoard(board: Board) {
                 for (var c = 0; c < sr.length; c++) {
                     var sv = sr[c]
                     // Each Col
-                    var card = cardList[pos.card]
-                    var player = pos.player
+                    var card = cardList[game.GetCardId(pos)]
+                    var player = game.GetPlayer(pos)
                     if (sv === card.sides.length) {
                         p += playerColor[player]("|_______|")
                     } else if (sv > card.sides.length) {
