@@ -228,25 +228,27 @@ export class Player {
 }
 
 export enum RuleSet {
-    AO,
-    TO,
-    Sam,
-    Plu,
-    // Com, Only exists in flags
-    Rev,
-    FA,
-    Asc,
-    Des,
-    Rnd,
-    Ord,
-    Cha,
-    SD,
-    Swp, // Don't need to worry about this since it happens at game start
-    Rou,
+    None,// 00
+    Rou, // 01
+    AO,  // 02
+    TO,  // 03
+    Sam, // 04
+    SD,  // 05
+    Plu, // 06
+    Rnd, // 07
+    Ord, // 08
+    Cha, // 09
+    Rev, // 0A = 10
+    FA,  // 0B = 11
+    Asc, // 0C = 12
+    Des, // 0D = 13
+    Swp, // 0E = 14 Don't need to worry about this since
+         //         it happens at game start
 }
 
 export enum RuleSetFlags {
     None = 0,
+    Rou = 1 << RuleSet.Rou,
     AO = 1 << RuleSet.AO,
     TO  = 1 << RuleSet.TO,
     Sam = 1 << RuleSet.Sam,
@@ -261,7 +263,6 @@ export enum RuleSetFlags {
     Cha = 1 << RuleSet.Cha,
     SD  = 1 << RuleSet.SD,
     Swp = 1 << RuleSet.Swp, // Don't need to worry about this since it happens at game start
-    Rou = 1 << RuleSet.Rou,
 }
 
 var words = [
