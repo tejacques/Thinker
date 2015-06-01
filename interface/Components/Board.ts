@@ -496,7 +496,6 @@ class Board extends React.Component<BoardProps, BoardState> {
         })
     }
     render() {
-        window['board'] = this
         var game = this.state.game
         var preview = this.state.preview
         var boardElements: React.ReactElement<any>[] = []

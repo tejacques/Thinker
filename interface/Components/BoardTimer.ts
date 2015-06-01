@@ -3,18 +3,19 @@ import Utils = require('../Utils')
 
 class BoardTimer extends React.Component<
     { active: boolean; style: React.CSSProperties },
-    { time: number; remaining: number; startTime: number }> {
+    { remaining: number; startTime: number }> {
+    time = 30000
     state = {
-        time: 60000,
-        remaining: this.props.active ? 60000 : 0,
-        startTime: (+new Date())
+        remaining: this.props.active ? this.time : 0,
+        startTime: (+new Date()),
     }
     componentWillReceiveProps(nextProps) {
-        this.setState({
-            time: 60000,
-            remaining: nextProps.active ? 60000 : 0,
-            startTime: (+new Date())
-        })
+        if (!this.props.active && nextProps.active) {
+            this.setState({
+                remaining: this.time,
+                startTime: (+new Date()),
+            })
+        }
     }
     render() {
         if (this.props.active && this.state.remaining > 0) {
@@ -40,8 +41,7 @@ class BoardTimer extends React.Component<
         if (this.props.active && this.state.remaining > 0) {
             var elapsed = (+new Date()) - this.state.startTime
             this.setState({
-                time: this.state.time,
-                remaining: this.state.time - elapsed,
+                remaining: this.time - elapsed,
                 startTime: this.state.startTime,
             })
         }
